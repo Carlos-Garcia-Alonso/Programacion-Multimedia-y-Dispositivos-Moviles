@@ -10,17 +10,26 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-
+//**La paleta de colores es orientativa, aún es pronto para definir un estilo sólido**
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = BotonesD,
+    secondary = TextoBotonesD,
+    tertiary = TituloD,
+    surface = CajaTextoD,
+    onSurface = TextoCajaTextoD,
+    background = FondoD,
+    primaryContainer = FondoTopBarD
+
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = BotonesL,
+    onPrimary = TextoBotonesL,
+    background = FondoL,
+    surface = CajaTextoL,
+    onSurface = TextoCajaTextoL,
+    tertiary = TituloL,
+    primaryContainer = FondoTopBarL
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),

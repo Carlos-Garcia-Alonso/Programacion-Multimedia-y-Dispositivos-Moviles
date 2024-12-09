@@ -33,6 +33,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -91,9 +98,11 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>)
         // "composable" es la función que define cada pantalla individual
         // La "route" es como el identificador de la pantalla
         composable(route = "pantalla_principal") {
-            // Se pasan a la función "MainScreen" la lista de técnicas para que las muestre y el
-            // "navController" para poder cambiar a otras pantallas desde la main
-            MainScreen(tecnicas = tecnicasList, navController = navController)
+            // Se pasan a la función "MainScreen" la lista de técnicas para que las muestre y se le
+            // dice que cuando la función onclick adquiera valor, se ejecute "navController.navigate
+            // con la ruta de destino correcta
+            MainScreen(tecnicas = tecnicasList, onclick = {title -> navController.navigate(route =
+            "detalle/${title}")})
         }
 
         // Pantalla de detalles de cada técnica
@@ -119,21 +128,45 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable // Utilizamos Composable para decir que estamos definiendo una UI
 // Declaramos una función que será la pantalla principal ("Main") de la aplicación
-fun MainScreen(tecnicas: List<Tecnica>, navController: NavHostController) {
+fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
+    //Configuramos el comportamiento de la TopAppBar:
+    //"enterAlwaysScrollBehavior" hace que la barra se esconda cuando el usuario desplaza hacia
+    // abajo y que se enseñe cuando se desplaza hacia arriba
+    //"rememberTopAppBarState()" recuerda el estado en el que se encuentra la "TopAppBar"
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     // Se crea un Scaffold que básicamente es un panel invisible que sirve para colocar los elementos
     // de una forma ordenada
     Scaffold(
+        //Establecemos el color de fondo del Scaffold
+        containerColor = MaterialTheme.colorScheme.background,
         // Añadimos un modificador para que el Scaffold ocupe toda la pantalla
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
+            // Cuando hay más elementos desplazables dentro de la pantalla es necesario informar al
+            // "scrollBehavior" que está sucediendo un desplazamiento
+            // ("scrollBehavior.nestedScrollConnection")
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {  // Le añadimos un "topBar"
             CenterAlignedTopAppBar( // Centramos el contenido del "topBar"
+                //Establecemos los colores de la TopBar:
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.secondary,
+                ),
                 title = {   // Creamos un título en el "topBar"
                     Text(
                         text = "Wrestling", // texto del título
                         fontWeight = FontWeight.Bold,   // fuente en negrita
-                        fontSize = 38.sp    // Tamaño de la fuente
+                        fontSize = 38.sp,    // Tamaño de la fuente
+                        maxLines = 1,   //Máximo de líneas
+                        // Cuando el texto no entra en el espacio asignado se muestra "..." en lugar
+                        // de recortarlo:
+                        overflow = TextOverflow.Ellipsis
                     )
-                }
+                },
+                // Vinculamos el "scrollBehavior" previamente configurado al "CenterAlignedTopAppBar"
+                // El ".nestedScroll" detecta el movimiento y el "scrollBehavior" decide qué hacer
+                // cuando se detecta ese movimiento
+                scrollBehavior = scrollBehavior
             )
         },
         // Ahora se coloca el contenido del Scaffold:
@@ -158,7 +191,7 @@ fun MainScreen(tecnicas: List<Tecnica>, navController: NavHostController) {
                 AddText(    // Utilizo una función propia para añadir un texto
                     texto = "Estas imágenes funcionarán a modo de botón para navegar por la aplicación",
                     // Añado paddings personalizados:
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp)
+                    modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 32.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))   // Separación con las imágenes
@@ -172,11 +205,11 @@ fun MainScreen(tecnicas: List<Tecnica>, navController: NavHostController) {
                         // El contenedor se hace "clickable" para que se pueda hacer click sobre él
                         // (evidentemente)
                         modifier = Modifier.clickable {
-                            // Cuando se hace click sobre él, se pasa la ruta con el título del objeto
-                            // a partir del que se ha generado la caja "imagen + texto". De ese modo se
-                            // "viaja" a la pantalla que tenga asignada esa ruta
-                            navController.navigate(route = "detalle/${tecnica.title}")
+                            // Cuando se hace click sobre él, se pasa a la funcion "onclick" el
+                            // string con el nombre de la técnica para que se añada a la navController
+                            onclick(tecnica.title)
                         }
+                            .padding(start = 16.dp, end = 16.dp)
                     )
                     //Despues de cada contenedor (imagen + texto) se añade un espacio
                     Spacer(modifier = Modifier.height(16.dp))
@@ -231,37 +264,29 @@ fun ImagenTexto(imageRes: Int, text: String, modifier: Modifier = Modifier) {
     Column( // Se crea una columna
         modifier = modifier
             .fillMaxWidth() // Se adapta al ancho disponible
-            .padding(16.dp),    //Se añade un padding general
+            .padding(20.dp),    //Se añade un padding general
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(  //Se añade la imagen
             // Se coloca la imagen con la ruta que se pasa como argumento
             painter = painterResource(id = imageRes),
             contentDescription = text,  // Se añade el texto como descripcion de la imagen
+            //Asegura que la imagen se adapte al tamaño del contenedor:
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth() // Se ajusta para que ocupe el ancho completo
+                .graphicsLayer( //Bordes redondeados sin deformarse:
+                    shape = RoundedCornerShape(25.dp), // Bordes redondeados
+                    clip = true // Activa el recorte
+                )
         )
         Text(   //Se añade el texto a continuación
             text = text,    //Se añade el texto que se pasa como argumento
             style = MaterialTheme.typography.bodyLarge, //Se pone un estilo predefinido
             modifier = Modifier
-                .padding(top = 8.dp)    //Un padding superior para separarlo de la imagen
+                .padding(top = 10.dp)    //Un padding superior para separarlo de la imagen
                 .fillMaxWidth() //Se ajusta al ancho disponible
                 .wrapContentWidth(Alignment.CenterHorizontally),    //Se centra horizontalmente
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    val tecnicasList = listOf(
-        Tecnica(R.drawable.tecnicas_basicas, title = "Técnicas Básicas"),
-        Tecnica(R.drawable.tecnicas_avanzadas, title = "Técnicas Avanzadas"),
-        Tecnica(R.drawable.gran_amplitud, title = "Técnicas de Gran Amplitud"),
-        Tecnica(R.drawable.tecnicas_suelo, title = "Técnicas de Suelo")
-    )
-    WrestlingAppTheme {
-        MainScreen(tecnicas = tecnicasList, navController = rememberNavController())
     }
 }
