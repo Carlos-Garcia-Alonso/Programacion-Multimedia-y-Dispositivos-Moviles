@@ -4,6 +4,9 @@
 ## Descripción
 
 Una aplicación de ejercicio enfocada al progreso tanto físico como técnico en el deporte de la Lucha Olímpica.
+Esta aplicación incluirá tutoriales paso a paso enfocados en la progresión de las técnicas. Rutinas físicas personalizables con ejercicios enfocados al desarrollo físico para la mejora en el deporte.
+Incluirá apartados de logros y de registros personales para poder monitorizar el progreso adecuadamente.
+Adicionalmente podrá contar con un apartado para el seguimiento de torneos o la visualización de aquellos que se emitan en abierto (acceso a internet).
 
 
 ## Estado
