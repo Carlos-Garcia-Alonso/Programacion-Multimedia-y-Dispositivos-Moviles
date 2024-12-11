@@ -34,6 +34,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.ui.graphics.graphicsLayer
@@ -152,6 +156,15 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.secondary,
                 ),
+                navigationIcon = {
+                    //Por el momento no es funcional
+                    IconButton(onClick = {  }) {
+                      Icon(
+                          Icons.Filled.Menu,
+                          contentDescription = "Menu",
+                      )
+                    }
+                },
                 title = {   // Creamos un título en el "topBar"
                     Text(
                         text = "Wrestling", // texto del título
