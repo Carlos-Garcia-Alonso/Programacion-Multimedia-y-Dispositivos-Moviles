@@ -2,7 +2,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+
+    <!-- Permisos de acceso a internet -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Permisos de almacenamiento: lectura y escritura (versiones antiguas)-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- Permisos para dispositivos Android 11+ (No recomendable incluirlo por políticas de
+    Google Play)-->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+    tools:ignore="ScopedStorage" />
+
+
     <application
+        android:name="WrestlingApplication"
+        android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -13,10 +30,14 @@
         android:theme="@style/Theme.WrestlingApp"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
+            android:configChanges="orientation|screenLayout"
+            android:screenOrientation="portrait"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.WrestlingApp">
+            android:theme="@style/Theme.WrestlingApp"
+            tools:ignore="DiscouragedApi">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

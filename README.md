@@ -26,6 +26,25 @@ En el futuro, la aplicación incluirá una base de datos que permita:
 - Almacenar perfiles de usuario personalizados: Cada usuario tendrá su propio perfil, donde podrán ver su historial de entrenamiento y logros.
 
 
+## Cambios v2.0
+
+En esta versión se añaden:
+
+1. Logs encargados de aportar información de las fases del ciclo de vida del Activity (apertura de la app, minimización, rotación...).
+
+2. Dependencias de Room para empezar a trabajar con bases de Datos. Adicionalmente se crea una "Entity" y un "Dao" como introducción al uso de Room (El código relacionado se encuentra en el archivo RoomDb.kt, ubicado en la carpeta data).
+
+3. Se añade un botón Salir que ejecuta "finishAndRemoveTask()" con el fin de comprobar que se muestra correctamente el Log definido en la función "onDestroy"
+
+4. Modificaciones en el AndroidManifest para personalizar la app: 
+
+  - El nombre de la aplicación se asigna desde el archivo res/values/strings.xml utilizando la clave "app_name". Para ello, en el AndroidManifest se establece la etiqueta "android:label="@string/app_name"").
+  - Se crea una clase que hereda de "application" para manejar funciones globales, como "onLowMemory".
+  - Se fija la orientación del Activity en vertical.
+  - Se declaran permisos de internet y almacenamiento.
+  - Se añade al Activity: "android:configChanges="orientation|screenLayout"" para poder manejar los cambios de rotación desde el Activity con la función "onConfigurationChanged".
+
+
 ## Próximos pasos 📋
 
 - Definir e introducir todos los apartados principales de la aplicación.

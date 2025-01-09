@@ -1,5 +1,7 @@
-package com.carlosgarciaalonso.wrestlingapp
+package com.carlosgarciaalonso.wrestlingapp.ui
 
+import android.app.Activity
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -24,7 +26,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.carlosgarciaalonso.wrestlingapp.ui.theme.WrestlingAppTheme
 import androidx.compose.foundation.verticalScroll
@@ -36,6 +37,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -43,11 +45,13 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.carlosgarciaalonso.wrestlingapp.R
 
 // Clase para los grupos de imagenes y técnicas
 // La diferencia entre una clase normal y una "data class" es que la "data class" no necesita declarar
@@ -58,8 +62,75 @@ data class Tecnica(val imageRes: Int, val title: String)
 
 // Esta clase es el punto de entrada de la app (algo así como el "Main" del Compose)
 class MainActivity : ComponentActivity() {
+
+    val TAG = this.javaClass.simpleName
+
+    //Para importar directamente esto hay que usar el comando "Alt" + "Ins" -> Darle a Override Methods
+    //-> Escribir el nombre de la funcion (Por ejemplo "onStart()". Y ya se importa de forma automática)
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "La aplicación se puede ver (onStart)")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "Aplicación reanudada (onResume)")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "Aplicación minimizada (onPause)")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "La aplicación ya no es visible (onStop)")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d(TAG, "Aplicación restaurada (onRestart))")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "Aplicación cerrada (onDestroy)")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Log.d(TAG, "Guardado del estado (onSaveInstanceState)")
+    }
+
+    // Para majear los cambios de configuración añadí al Manifest la línea
+    //"android:configChanges="orientation|screenLayout"". Tuve que añadir el"screenLayout" porque si
+    // ponía "orientation|screenSize", al pasar de vertical a horizontal; la aplicación destruía su
+    // actividad y volvía a recomponerse. Por el contrario, al pasar de
+    // horizontal a vertical si que se mostraba correctamente el log del "onConfigurationChanged".
+    // Gracias a poner el "screenLayout" ya se muestra el log correctamente en ambas ocasiones aunque
+    // ahora hay que manejar la posibilidad de que se muestre el log con el mensaje de que la pantalla
+    // ha sido rotada en otras ocasiones como en cambios de resolución del movil.
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Verifica si realmente ha habido un cambio de orientación
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ||
+            newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            // Log que se muestra cuando se rota la pantalla:
+            Log.d(TAG, "El Activity ha rotado: orientación actual " +
+                    if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        "vertical"
+                    } else {
+                        "horizontal"
+                    }
+            )
+        } else {
+            Log.d(TAG, "Otro cambio de screenLayout")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "Se ha abierto la aplicación (onCreate)")
         enableEdgeToEdge()
         // Esta función se utiliza para definir el contenido en pantalla:
         setContent {
@@ -227,6 +298,12 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
                     //Despues de cada contenedor (imagen + texto) se añade un espacio
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+
+                // Este botón sirve de comprobación para el ejercicio "Agrega un log que se muestre
+                // en Logcat cada vez que: "Cierras por completo la aplicación"
+                BotonSalir()
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     )
@@ -301,5 +378,22 @@ fun ImagenTexto(imageRes: Int, text: String, modifier: Modifier = Modifier) {
                 .fillMaxWidth() //Se ajusta al ancho disponible
                 .wrapContentWidth(Alignment.CenterHorizontally),    //Se centra horizontalmente
         )
+    }
+}
+
+// Este botón sirve de comprobación para el ejercicio "Agrega un log que se muestre en Logcat cada
+// vez que: "Cierras por completo la aplicación"
+@Composable
+fun BotonSalir() {
+    // Información de qué se está ejecutando en cada momento; en este caso es una activity
+    val context = LocalContext.current
+
+    Button(onClick = {
+        //Cierra la actividad si el contexto es una actividad
+        if (context is Activity) {
+            context.finishAndRemoveTask()
+        }
+    }) {
+        Text("Salir")
     }
 }

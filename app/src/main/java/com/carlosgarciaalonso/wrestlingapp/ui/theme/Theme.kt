@@ -46,7 +46,8 @@ private val LightColorScheme = lightColorScheme(
 fun WrestlingAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    //Si se activa esto, la aplicación adquiere los colores del tema del teléfono
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

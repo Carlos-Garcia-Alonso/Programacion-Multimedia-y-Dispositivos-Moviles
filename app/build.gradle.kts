@@ -1,7 +1,9 @@
-plugins {
+plugins {   //plugins de módulo
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
+    id("androidx.room")
 }
 
 android {
@@ -38,10 +40,41 @@ android {
     buildFeatures {
         compose = true
     }
+
+    room {
+        schemaDirectory("$projectDir/schemas")
+    }
+
+    sourceSets {
+        // Adds exported schema location as test app assets.
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
+
 }
 
 dependencies {
 
+    implementation(libs.androidx.room.runtime)
+
+    ksp(libs.androidx.room.room.compiler)
+
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation(libs.androidx.room.ktx)
+
+    // optional - RxJava2 support for Room
+    implementation(libs.androidx.room.rxjava2)
+
+    // optional - RxJava3 support for Room
+    implementation(libs.androidx.room.rxjava3)
+
+    // optional - Guava support for Room, including Optional and ListenableFuture
+    implementation(libs.androidx.room.guava)
+
+    // optional - Test helpers
+    testImplementation(libs.androidx.room.testing)
+
+    // optional - Paging 3 Integration
+    implementation(libs.androidx.room.paging)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
