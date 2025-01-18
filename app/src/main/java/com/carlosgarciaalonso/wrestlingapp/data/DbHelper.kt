@@ -17,7 +17,7 @@ class WrestlingSqliteHelper(context: Context) :
         // Insertar datos iniciales en la tabla de categorías
         db.execSQL("INSERT INTO ${WrestlingSqliteContract.CategoryEntry.TABLE_NAME} " +
                 "(${WrestlingSqliteContract.CategoryEntry.COLUMN_NAME_NOMBRE}) VALUES " +
-                "('Strength'), ('Cardio'), ('Flexibility')")
+                "('Fuerza'), ('Cardio'), ('Flexibilidad'), ('Técnica')")
 
         // Insertar datos iniciales en la tabla de ejercicios
         db.execSQL("INSERT INTO ${WrestlingSqliteContract.ExerciseEntry.TABLE_NAME} " +
@@ -25,9 +25,8 @@ class WrestlingSqliteHelper(context: Context) :
                 "${WrestlingSqliteContract.ExerciseEntry.COLUMN_NAME_DESCRIPCION}, " +
                 "${WrestlingSqliteContract.ExerciseEntry.COLUMN_NAME_CATEGORIA_ID}, " +
                 "${WrestlingSqliteContract.ExerciseEntry.COLUMN_NAME_DIFICULTAD}) VALUES " +
-                "('Push-ups', 'Classic chest exercise', 1, 'facil'), " +
-                "('Squats', 'Leg and glute exercise', 1, 'moderado'), " +
-                "('Running', 'Cardio exercise for endurance', 2, 'dificil')")
+                "('Push-ups', 'Ejercicio para pecho y tríceps', 1, 'facil'), " +
+                "('Standard Squats', 'Ejercicio para cuádriceps y glúteos', 1, 'moderado')")
 
     }
 

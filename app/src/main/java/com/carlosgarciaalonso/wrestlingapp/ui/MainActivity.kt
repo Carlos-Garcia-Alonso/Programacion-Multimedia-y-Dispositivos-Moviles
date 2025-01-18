@@ -144,7 +144,8 @@ class MainActivity : ComponentActivity() {
                     Tecnica(imageRes = R.drawable.tecnicas_basicas, title = "Técnicas Básicas"),
                     Tecnica(imageRes = R.drawable.tecnicas_avanzadas, title = "Técnicas Avanzadas"),
                     Tecnica(imageRes = R.drawable.gran_amplitud, title = "Técnicas de Gran Amplitud"),
-                    Tecnica(imageRes = R.drawable.tecnicas_suelo, title = "Técnicas de Suelo")
+                    Tecnica(imageRes = R.drawable.tecnicas_suelo, title = "Técnicas de Suelo"),
+                    Tecnica(imageRes = R.drawable.fisica_lucha, title = "Física")
                 )
                 // Compose funciona de modo que cada cambio en la interfaz provoca que se tenga que
                 // "redibujar". "rememberNavController" permite que cuando ocurra este redibujado
