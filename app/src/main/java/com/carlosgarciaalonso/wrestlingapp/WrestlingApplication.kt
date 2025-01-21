@@ -4,7 +4,14 @@ import android.app.Application
 import android.content.ComponentCallbacks2
 import android.content.res.Configuration
 import android.util.Log
+import androidx.room.Room
+import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.AppDatabase
+import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.RoomCallback
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 
 class WrestlingApplication : Application() {
 
@@ -16,6 +23,11 @@ class WrestlingApplication : Application() {
     // y no se creen múltiples instancias de la base de datos durante la ejecución.
     lateinit var dbHelper: WrestlingSqliteHelper
 
+    lateinit var roomDatabase: AppDatabase // Lateinit para la base de datos de Room
+    // Esta variable define la corutina para que el insert de datos iniciales de la base de datos de
+    // Room con el callback se realice en segundo plano.
+    private val applicationScope = CoroutineScope(Job() + Dispatchers.IO)
+
     val TAG = "WrestlingApplication"
 
     override fun onCreate() {
@@ -23,11 +35,21 @@ class WrestlingApplication : Application() {
         Log.d(TAG, "WrestlingApplication onCreate")
 
         dbHelper = WrestlingSqliteHelper(this) // Crear una única instancia
+
+
+        // Inicialización única de la base de datos Room
+        roomDatabase = Room.databaseBuilder(
+            this,
+            AppDatabase::class.java,
+            "tournament_database" // Nombre de la base de datos
+        ).addCallback(RoomCallback(roomDatabase, applicationScope))
+            .build()
     }
 
     override fun onTerminate() {
         super.onTerminate()
         dbHelper.close()
+        applicationScope.cancel() // Cancela todas las coroutines asociadas
         Log.d(TAG, "La aplicación se ha cerrado por completo")
     }
 

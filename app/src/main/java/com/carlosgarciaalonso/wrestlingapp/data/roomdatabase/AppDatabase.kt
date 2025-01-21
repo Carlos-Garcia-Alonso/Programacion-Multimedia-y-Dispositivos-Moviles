@@ -7,12 +7,14 @@ import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.dao.*
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.*
 
 @Database(
-    entities = [User::class, Category::class, Exercise::class, Progress::class],
+    entities = [Tournament::class, CategoryRoom::class, Weight::class, TournamentCategory::class, TournamentWeight::class],
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun userDao(): UserDao
-    abstract fun categoryDao(): CategoryDao
-    abstract fun exerciseDao(): ExerciseDao
-    abstract fun progressDao(): ProgressDao
+    abstract fun tournamentDao(): TournamentDao
+    abstract fun categoryRoomDao() : CategoryRoomDao
+    abstract fun weightDao(): WeightDao
+    abstract fun tournamentCategoryDao(): TournamentCategoryDao
+    abstract fun tournamentWeightDao(): TournamentWeightDao
 }
+
