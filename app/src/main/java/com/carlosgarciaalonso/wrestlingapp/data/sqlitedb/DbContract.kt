@@ -1,4 +1,4 @@
-package com.carlosgarciaalonso.wrestlingapp.data
+package com.carlosgarciaalonso.wrestlingapp.data.sqlitedb
 
 import android.provider.BaseColumns
 
@@ -56,7 +56,7 @@ object WrestlingSqliteContract {
                 $COLUMN_NAME_DESCRIPCION TEXT,
                 $COLUMN_NAME_CATEGORIA_ID INTEGER,
                 $COLUMN_NAME_DIFICULTAD TEXT NOT NULL CHECK($COLUMN_NAME_DIFICULTAD IN ('facil', 'moderado', 'dificil')),
-                FOREIGN KEY ($COLUMN_NAME_CATEGORIA_ID) REFERENCES ${CategoryEntry.TABLE_NAME}(${CategoryEntry.COLUMN_NAME_ID})
+                FOREIGN KEY ($COLUMN_NAME_CATEGORIA_ID) REFERENCES ${CategoryEntry.TABLE_NAME}(${CategoryEntry.COLUMN_NAME_ID}) ON DELETE CASCADE
             )
         """
         const val SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS $TABLE_NAME"
@@ -76,10 +76,11 @@ object WrestlingSqliteContract {
                 $COLUMN_NAME_USER_ID INTEGER NOT NULL,
                 $COLUMN_NAME_EJERCICIO_ID INTEGER NOT NULL,
                 $COLUMN_NAME_FECHA TEXT NOT NULL,
-                FOREIGN KEY ($COLUMN_NAME_USER_ID) REFERENCES ${UserEntry.TABLE_NAME}(${UserEntry.COLUMN_NAME_ID}),
-                FOREIGN KEY ($COLUMN_NAME_EJERCICIO_ID) REFERENCES ${ExerciseEntry.TABLE_NAME}(${ExerciseEntry.COLUMN_NAME_ID})
+                FOREIGN KEY ($COLUMN_NAME_USER_ID) REFERENCES ${UserEntry.TABLE_NAME}(${UserEntry.COLUMN_NAME_ID}) ON DELETE CASCADE,
+                FOREIGN KEY ($COLUMN_NAME_EJERCICIO_ID) REFERENCES ${ExerciseEntry.TABLE_NAME}(${ExerciseEntry.COLUMN_NAME_ID}) ON DELETE CASCADE
             )
         """
         const val SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS $TABLE_NAME"
     }
+
 }

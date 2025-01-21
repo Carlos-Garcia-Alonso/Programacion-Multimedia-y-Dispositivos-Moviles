@@ -1,4 +1,4 @@
-package com.carlosgarciaalonso.wrestlingapp.data
+package com.carlosgarciaalonso.wrestlingapp.data.sqlitedb
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -17,7 +17,8 @@ class WrestlingSqliteHelper(context: Context) :
         // Insertar datos iniciales en la tabla de categorías
         db.execSQL("INSERT INTO ${WrestlingSqliteContract.CategoryEntry.TABLE_NAME} " +
                 "(${WrestlingSqliteContract.CategoryEntry.COLUMN_NAME_NOMBRE}) VALUES " +
-                "('Fuerza'), ('Cardio'), ('Flexibilidad'), ('Técnica')")
+                "('Fuerza'), ('Cardio'), ('Flexibilidad'), ('Técnicas Básicas'), " +
+                "('Técnicas Avanzadas'), ('Técnicas de Gran Amplitud'), ('Técnicas de Suelo')")
 
         // Insertar datos iniciales en la tabla de ejercicios
         db.execSQL("INSERT INTO ${WrestlingSqliteContract.ExerciseEntry.TABLE_NAME} " +
@@ -26,6 +27,21 @@ class WrestlingSqliteHelper(context: Context) :
                 "${WrestlingSqliteContract.ExerciseEntry.COLUMN_NAME_CATEGORIA_ID}, " +
                 "${WrestlingSqliteContract.ExerciseEntry.COLUMN_NAME_DIFICULTAD}) VALUES " +
                 "('Push-ups', 'Ejercicio para pecho y tríceps', 1, 'facil'), " +
+                "('Burpees', 'Ejercicio para resistencia anaeróbica', 2, 'moderado'), " +
+                "('Calentamiento de cuello en puente', 'Ejercicio para ganar fuerza y flexibilidad " +
+                "en el cuello. Hay que mover la cabeza en todas las direcciones en posición de " +
+                "puente', 3, 'moderado'), " +
+                "('Entrada a dos piernas', 'Técnica básica de derribo. Consiste en apoyar la rodilla" +
+                " entre las piernas del contrario, el otro pie se apoya en el exterior y situando la" +
+                " cabeza por el mismo lado que la rodilla levantada, se empuja en dirección " +
+                "contraria', 4, 'facil'), " +
+                "('Entrada a piernas por detrás', 'Técnica de derribo que consiste en pasar atrás " +
+                "con una entrada a piernas y derribar desde la espalda', 5, 'moderado'), " +
+                "('Golpe de cadera', 'Técnica de gran amplitud que consiste en derribar al oponente" +
+                " agarrando el brazo y la cabeza y girando sobre uno mismo', 6, 'moderado'), " +
+                "('Caída', 'Técnica en el suelo que consiste en inmovilizar al contrario con ambos " +
+                "omóplatos en el suelo durante 3 segundos y que siempre resulta en victoria', 7, " +
+                "'facil'), " +
                 "('Standard Squats', 'Ejercicio para cuádriceps y glúteos', 1, 'moderado')")
 
     }

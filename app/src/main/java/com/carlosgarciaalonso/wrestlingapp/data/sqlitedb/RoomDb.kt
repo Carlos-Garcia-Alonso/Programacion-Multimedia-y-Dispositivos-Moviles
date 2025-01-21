@@ -1,4 +1,4 @@
-package com.carlosgarciaalonso.wrestlingapp.data
+package com.carlosgarciaalonso.wrestlingapp.data.sqlitedb
 
 
 import androidx.room.ColumnInfo

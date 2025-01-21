@@ -42,16 +42,28 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.carlosgarciaalonso.wrestlingapp.R
+import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.repositories.ExerciseRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // Clase para los grupos de imagenes y técnicas
 // La diferencia entre una clase normal y una "data class" es que la "data class" no necesita declarar
@@ -190,12 +202,36 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>)
             // argumentos que se pasaron. Por lo tanto "backStackEntry.arguments" incluye los
             // argumentos que se pasaron a esta pantalla. El modificador "?" se pone para que no
             // "pete" aunque sea null.
+            val context = LocalContext.current
+            //Con el "remember" nos aseguramos de que solo se inicialice una vez
+            val exerciseRepository = remember { ExerciseRepository(context) }
+            val exercises = rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
+
             // En la variable "apartadoTecnica" se almacena el valor asociado a la clave "tituloTecnica"
             // (definido en la ruta); por lo tanto, si se hace "click" en la primera imagen el par
             // clave-valor sería algo así: "tituloTecnica: Técnicas Básicas".
             val apartadoTecnica = backStackEntry.arguments?.getString("tituloTecnica")
+
+            //Usar LaunchedEffect para manejar la corutina (básicamente se encarga de crearla)
+            LaunchedEffect(apartadoTecnica) {
+                // El "withContext" es el encargado de cambiar el contexto de la corutina creada para
+                // que el codigo que contiene se ejecute en un hilo en segundo plano
+                // Podría definirse directamente la función "getExercisesByCategory" como una función
+                // suspendida y aportar en la propia función el contexto
+                withContext(Dispatchers.IO) {
+                    //Acceso a la base de datos
+                    if (apartadoTecnica != null && apartadoTecnica != "Física") {
+                        val result = exerciseRepository.getExercisesByCategory(apartadoTecnica)
+                        exercises.value = result
+                    } else if (apartadoTecnica == "Física") {
+                        val result = exerciseRepository.getExercisesForFisica()
+                        exercises.value = result
+                    }
+                }
+            }
+
             //Por último se pasa ese string a la función para mostrar la pantalla
-            PantallaTecnica(tecnicaTitle = apartadoTecnica)
+            PantallaTecnica(tecnicaTitle = apartadoTecnica, exercises = exercises.value)
         }
     }
 }
@@ -313,7 +349,7 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
 @Composable //Utilizamos Composable para decir que estamos definiendo una UI
 // Esta función aún es muy primitiva pero es la que define la pantalla que se abre cuando se hace
 // click en alguna de las técnicas
-fun PantallaTecnica(tecnicaTitle: String?) {
+fun PantallaTecnica(tecnicaTitle: String?, exercises: List<String>) {
     Box(    //Se crea una caja
         modifier = Modifier
             .fillMaxSize()  //Se adapta para que cubra toda la pantalla
@@ -321,15 +357,38 @@ fun PantallaTecnica(tecnicaTitle: String?) {
         //Se centra el contenido al centro tanto vertical como horizontalmente
         contentAlignment = Alignment.Center
     ) { //Contenido de la caja:
-        Text(   //Se crea un texto
-            // Si no se ha pasado ningun argumento para el título se pone por defecto el texto
-            // "Detalles de la técnica".
-            text = tecnicaTitle ?: "Detalles de la técnica",
-            // Se aplica un estilo definido para las cabeceras que ya proporciona el objeto
-            // "MaterialTheme"
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold    // Se pone en negrita
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // Mostrar el título de la técnica
+            Text(
+                text = tecnicaTitle ?: "Detalles de la técnica",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Lista de ejercicios:",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            // Mostrar la lista de ejercicios, si existen
+            if (exercises.isNotEmpty()) {
+                exercises.forEach { exercise ->
+                    Text(
+                        text = exercise,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+            } else {
+                // Mensaje si no hay ejercicios disponibles
+                Text(
+                    text = "No hay ejercicios disponibles.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontStyle = FontStyle.Italic
+                )
+            }
+        }
     }
 }
 

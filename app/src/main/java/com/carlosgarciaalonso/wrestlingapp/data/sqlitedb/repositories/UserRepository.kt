@@ -1,14 +1,15 @@
-package com.carlosgarciaalonso.wrestlingapp.data.repositories
+package com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.repositories
 
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-import com.carlosgarciaalonso.wrestlingapp.data.WrestlingSqliteContract
-import com.carlosgarciaalonso.wrestlingapp.data.WrestlingSqliteHelper
+import com.carlosgarciaalonso.wrestlingapp.WrestlingApplication
+import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteContract
+import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteHelper
 
 
 class UserRepository(context: Context) {
-    private val dbHelper = WrestlingSqliteHelper(context)
+    private val dbHelper = (context.applicationContext as WrestlingApplication).dbHelper
 
     // Create
     fun insertUser(nombre: String, correo: String, fechaRegistro: String): Long {

@@ -1,13 +1,14 @@
-package com.carlosgarciaalonso.wrestlingapp.data.repositories
+package com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.repositories
 
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-import com.carlosgarciaalonso.wrestlingapp.data.WrestlingSqliteContract
-import com.carlosgarciaalonso.wrestlingapp.data.WrestlingSqliteHelper
+import com.carlosgarciaalonso.wrestlingapp.WrestlingApplication
+import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteContract
+import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteHelper
 
 class ProgressRepository(context: Context) {
-    private val dbHelper = WrestlingSqliteHelper(context)
+    private val dbHelper = (context.applicationContext as WrestlingApplication).dbHelper
 
     // Create (Insertar un nuevo progreso)
     fun insertProgress(userId: Long, ejercicioId: Long, fecha: String): Long {

@@ -4,18 +4,30 @@ import android.app.Application
 import android.content.ComponentCallbacks2
 import android.content.res.Configuration
 import android.util.Log
+import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteHelper
 
 class WrestlingApplication : Application() {
+
+    //lateinit se utiliza para declarar una variable que no puede ser null pero que no vas a
+    // inicializar en este momento; es como decirle al programa "fiate que la voy a inicializar
+    // antes de usarla"
+    // Aquí se declara la variable "dbHelper" como una propiedad de "WrestlingApplication", lo que
+    // permite que sea compartida por todos los repositorios, asegurando que se inicializa una sola vez
+    // y no se creen múltiples instancias de la base de datos durante la ejecución.
+    lateinit var dbHelper: WrestlingSqliteHelper
 
     val TAG = "WrestlingApplication"
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "WrestlingApplication onCreate")
+
+        dbHelper = WrestlingSqliteHelper(this) // Crear una única instancia
     }
 
     override fun onTerminate() {
         super.onTerminate()
+        dbHelper.close()
         Log.d(TAG, "La aplicación se ha cerrado por completo")
     }
 
