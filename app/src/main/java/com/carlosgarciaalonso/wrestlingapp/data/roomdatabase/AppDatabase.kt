@@ -1,7 +1,9 @@
 package com.carlosgarciaalonso.wrestlingapp.data.roomdatabase
 
 
+import android.content.Context
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.dao.*
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.*
@@ -16,5 +18,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun weightDao(): WeightDao
     abstract fun tournamentCategoryDao(): TournamentCategoryDao
     abstract fun tournamentWeightDao(): TournamentWeightDao
+
+
+
 }
 

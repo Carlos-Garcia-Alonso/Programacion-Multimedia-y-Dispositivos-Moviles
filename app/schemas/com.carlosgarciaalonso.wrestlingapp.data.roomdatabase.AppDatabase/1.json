@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "8b2e1cef156e8533cd602dc6a3ec58c6",
+    "identityHash": "30b6c8d1658a8a1607e0c009409fa003",
     "entities": [
       {
-        "tableName": "users",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombre` TEXT NOT NULL, `correo` TEXT NOT NULL, `fecha_registro` TEXT NOT NULL)",
+        "tableName": "tournaments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `city` TEXT NOT NULL, `time` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -15,20 +15,20 @@
             "notNull": true
           },
           {
-            "fieldPath": "nombre",
-            "columnName": "nombre",
+            "fieldPath": "date",
+            "columnName": "date",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "correo",
-            "columnName": "correo",
+            "fieldPath": "city",
+            "columnName": "city",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "fecha_registro",
-            "columnName": "fecha_registro",
+            "fieldPath": "time",
+            "columnName": "time",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -43,8 +43,8 @@
         "foreignKeys": []
       },
       {
-        "tableName": "categorias",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombre` TEXT NOT NULL, `descripcion` TEXT)",
+        "tableName": "categories",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `min_age` INTEGER NOT NULL, `max_age` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -53,16 +53,22 @@
             "notNull": true
           },
           {
-            "fieldPath": "nombre",
-            "columnName": "nombre",
+            "fieldPath": "name",
+            "columnName": "name",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "descripcion",
-            "columnName": "descripcion",
-            "affinity": "TEXT",
-            "notNull": false
+            "fieldPath": "min_age",
+            "columnName": "min_age",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "max_age",
+            "columnName": "max_age",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -75,8 +81,8 @@
         "foreignKeys": []
       },
       {
-        "tableName": "ejercicios",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombre` TEXT NOT NULL, `descripcion` TEXT, `categoria_id` INTEGER, `dificultad` TEXT NOT NULL, FOREIGN KEY(`categoria_id`) REFERENCES `categorias`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "tableName": "weights",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `weight` REAL NOT NULL, `category_id` INTEGER NOT NULL, FOREIGN KEY(`category_id`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -85,27 +91,15 @@
             "notNull": true
           },
           {
-            "fieldPath": "nombre",
-            "columnName": "nombre",
-            "affinity": "TEXT",
+            "fieldPath": "weight",
+            "columnName": "weight",
+            "affinity": "REAL",
             "notNull": true
           },
           {
-            "fieldPath": "descripcion",
-            "columnName": "descripcion",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "categoria_id",
-            "columnName": "categoria_id",
+            "fieldPath": "category_id",
+            "columnName": "category_id",
             "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
-            "fieldPath": "dificultad",
-            "columnName": "dificultad",
-            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -118,11 +112,11 @@
         "indices": [],
         "foreignKeys": [
           {
-            "table": "categorias",
+            "table": "categories",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
-              "categoria_id"
+              "category_id"
             ],
             "referencedColumns": [
               "id"
@@ -131,8 +125,8 @@
         ]
       },
       {
-        "tableName": "progreso",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `user_id` INTEGER NOT NULL, `ejercicio_id` INTEGER NOT NULL, `fecha` TEXT NOT NULL, FOREIGN KEY(`user_id`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`ejercicio_id`) REFERENCES `ejercicios`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "tableName": "tournament_categories",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tournament_id` INTEGER NOT NULL, `category_id` INTEGER NOT NULL, FOREIGN KEY(`tournament_id`) REFERENCES `tournaments`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`category_id`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -141,21 +135,15 @@
             "notNull": true
           },
           {
-            "fieldPath": "user_id",
-            "columnName": "user_id",
+            "fieldPath": "tournament_id",
+            "columnName": "tournament_id",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ejercicio_id",
-            "columnName": "ejercicio_id",
+            "fieldPath": "category_id",
+            "columnName": "category_id",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fecha",
-            "columnName": "fecha",
-            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -168,22 +156,77 @@
         "indices": [],
         "foreignKeys": [
           {
-            "table": "users",
+            "table": "tournaments",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
-              "user_id"
+              "tournament_id"
             ],
             "referencedColumns": [
               "id"
             ]
           },
           {
-            "table": "ejercicios",
+            "table": "categories",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
-              "ejercicio_id"
+              "category_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "tournament_weights",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tournament_id` INTEGER NOT NULL, `weight_id` INTEGER NOT NULL, FOREIGN KEY(`tournament_id`) REFERENCES `tournaments`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`weight_id`) REFERENCES `weights`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tournament_id",
+            "columnName": "tournament_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weight_id",
+            "columnName": "weight_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "tournaments",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "tournament_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "weights",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "weight_id"
             ],
             "referencedColumns": [
               "id"
@@ -195,7 +238,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8b2e1cef156e8533cd602dc6a3ec58c6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '30b6c8d1658a8a1607e0c009409fa003')"
     ]
   }
 }

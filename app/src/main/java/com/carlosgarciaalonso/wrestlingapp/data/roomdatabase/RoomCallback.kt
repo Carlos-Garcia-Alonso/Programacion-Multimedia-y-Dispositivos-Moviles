@@ -10,16 +10,17 @@ import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.*
 
 //Esta clase se utiliza para añadir los datos iniciales a la base de datos de Room, estos datos se
 // insertarán a través de un "callback" en la clase "WrestlingApplication"
-class RoomCallback(private val database: AppDatabase, private val ioScope: CoroutineScope) : RoomDatabase.Callback() {
+class RoomCallback(private val database: AppDatabase) : RoomDatabase.Callback() {
 
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
-        ioScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
+            // Inserta datos iniciales
             datosIniciales(database)
         }
     }
 
-    private suspend fun datosIniciales(database: AppDatabase) {
+    suspend fun datosIniciales(database: AppDatabase) {
         val categoryDao = database.categoryRoomDao()
         val tournamentDao = database.tournamentDao()
         val weightDao = database.weightDao()

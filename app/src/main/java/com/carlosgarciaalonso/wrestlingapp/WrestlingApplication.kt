@@ -5,6 +5,8 @@ import android.content.ComponentCallbacks2
 import android.content.res.Configuration
 import android.util.Log
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.AppDatabase
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.RoomCallback
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteHelper
@@ -12,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class WrestlingApplication : Application() {
 
@@ -42,8 +45,8 @@ class WrestlingApplication : Application() {
             this,
             AppDatabase::class.java,
             "tournament_database" // Nombre de la base de datos
-        ).addCallback(RoomCallback(roomDatabase, applicationScope))
-            .build()
+        ) .build()
+
     }
 
     override fun onTerminate() {

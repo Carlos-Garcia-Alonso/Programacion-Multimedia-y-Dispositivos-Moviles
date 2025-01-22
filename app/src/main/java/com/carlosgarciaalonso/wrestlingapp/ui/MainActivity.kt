@@ -1,5 +1,6 @@
 package com.carlosgarciaalonso.wrestlingapp.ui
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.res.Configuration
 import android.os.Bundle
@@ -36,15 +37,22 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -57,6 +65,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.carlosgarciaalonso.wrestlingapp.R
+import com.carlosgarciaalonso.wrestlingapp.WrestlingApplication
+import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.AppDatabase
+import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.RoomCallback
+import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
+import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.Tournament
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.repositories.ExerciseRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -142,6 +155,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val roomDatabase = (application as WrestlingApplication).roomDatabase
         Log.d(TAG, "Se ha abierto la aplicación (onCreate)")
         enableEdgeToEdge()
         // Esta función se utiliza para definir el contenido en pantalla:
@@ -164,7 +178,7 @@ class MainActivity : ComponentActivity() {
                 // de la interfaz, la aplicación recuerde el punto en el que se encontraba. Si no podría
                 // ocurrir que el usuario volviese a la pantalla principal y perdiese lo que estaba viendo
                 val navController = rememberNavController()
-                SetupNavGraph(navController = navController, tecnicasList = tecnicasList)
+                SetupNavGraph(navController = navController, tecnicasList = tecnicasList, roomDatabase)
             }
         }
     }
@@ -176,7 +190,7 @@ class MainActivity : ComponentActivity() {
 // "navController" es el controlador que indica como se viaja de una pantalla a otra
 // "tecnicasList" es la lista de técnicas, se pasa como parámetro para poder tener acceso a esos datos
 // desde las distintas pantallas
-fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>) {
+fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>, roomDatabase: AppDatabase) {
     NavHost(
         //Se asigna el controlador de navegación que se pasa como parámetro
         navController = navController,
@@ -189,8 +203,8 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>)
             // Se pasan a la función "MainScreen" la lista de técnicas para que las muestre y se le
             // dice que cuando la función onclick adquiera valor, se ejecute "navController.navigate
             // con la ruta de destino correcta
-            MainScreen(tecnicas = tecnicasList, onclick = {title -> navController.navigate(route =
-            "detalle/${title}")})
+            MainScreen(tecnicas = tecnicasList, onclick = { route ->
+                navController.navigate(route)})
         }
 
         // Pantalla de detalles de cada técnica
@@ -233,6 +247,12 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>)
             //Por último se pasa ese string a la función para mostrar la pantalla
             PantallaTecnica(tecnicaTitle = apartadoTecnica, exercises = exercises.value)
         }
+        //Pantalla para los torneos
+        composable(route = "torneos") {
+
+            PantallaTorneo(roomDatabase)
+
+        }
     }
 }
 
@@ -241,11 +261,13 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>)
 @Composable // Utilizamos Composable para decir que estamos definiendo una UI
 // Declaramos una función que será la pantalla principal ("Main") de la aplicación
 fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
+
     //Configuramos el comportamiento de la TopAppBar:
     //"enterAlwaysScrollBehavior" hace que la barra se esconda cuando el usuario desplaza hacia
     // abajo y que se enseñe cuando se desplaza hacia arriba
     //"rememberTopAppBarState()" recuerda el estado en el que se encuentra la "TopAppBar"
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
     // Se crea un Scaffold que básicamente es un panel invisible que sirve para colocar los elementos
     // de una forma ordenada
     Scaffold(
@@ -265,12 +287,12 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
                     titleContentColor = MaterialTheme.colorScheme.secondary,
                 ),
                 navigationIcon = {
-                    //Por el momento no es funcional
-                    IconButton(onClick = {  }) {
-                      Icon(
-                          Icons.Filled.Menu,
-                          contentDescription = "Menu",
-                      )
+                    // Botón de menú con la acción personalizada
+                    IconButton(onClick = { onclick("Perfil") }) {
+                        Icon(
+                            Icons.Filled.AccountCircle, // Cambia esto si quieres otro icono
+                            contentDescription = "Perfil"
+                        )
                     }
                 },
                 title = {   // Creamos un título en el "topBar"
@@ -328,13 +350,28 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
                         modifier = Modifier.clickable {
                             // Cuando se hace click sobre él, se pasa a la funcion "onclick" el
                             // string con el nombre de la técnica para que se añada a la navController
-                            onclick(tecnica.title)
+                            onclick("detalle/${tecnica.title}")
                         }
                             .padding(start = 16.dp, end = 16.dp)
                     )
                     //Despues de cada contenedor (imagen + texto) se añade un espacio
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+
+                ImagenTexto(
+                    imageRes = R.drawable.torneo,
+                    text = "Torneos",
+                    // El contenedor se hace "clickable" para que se pueda hacer click sobre él
+                    // (evidentemente)
+                    modifier = Modifier.clickable {
+                        // Cuando se hace click sobre él, se pasa a la funcion "onclick" el
+                        // string con el nombre de la técnica para que se añada a la navController
+                        onclick("torneos")
+                    }
+                        .padding(start = 16.dp, end = 16.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Este botón sirve de comprobación para el ejercicio "Agrega un log que se muestre
                 // en Logcat cada vez que: "Cierras por completo la aplicación"
@@ -344,7 +381,8 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
             }
         }
     )
-}
+    }
+
 
 @Composable //Utilizamos Composable para decir que estamos definiendo una UI
 // Esta función aún es muy primitiva pero es la que define la pantalla que se abre cuando se hace
@@ -391,6 +429,74 @@ fun PantallaTecnica(tecnicaTitle: String?, exercises: List<String>) {
         }
     }
 }
+
+
+
+@Composable
+fun PantallaTorneo(database : AppDatabase) {
+    val torneos = remember { mutableStateOf<List<TournamentWithCategories>>(emptyList()) }
+
+    // Cargar torneos desde la base de datos
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            // Consulta los torneos
+            val data = database.tournamentDao().getTournamentsWithCategory()
+            if (data.isEmpty()) {
+                // Inserta datos iniciales si no existen
+                RoomCallback(database).datosIniciales(database)
+                // Recarga los torneos después de la inserción
+                val newData = database.tournamentDao().getTournamentsWithCategory()
+                withContext(Dispatchers.Main) {
+                    torneos.value = newData
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    torneos.value = data
+                }
+            }
+        }
+    }
+
+    Scaffold (
+        modifier = Modifier.fillMaxSize(),
+        content = { autoPadding ->
+            Column(Modifier
+                .fillMaxSize()
+                .padding(autoPadding)
+                .verticalScroll(rememberScrollState())
+            ) {
+                // Mostrar el título de la técnica
+                Text(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    text = "Lista de torneos",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Mostrar la lista de torneos
+                if (torneos.value.isNotEmpty()) {
+                    torneos.value.forEach { torneo ->
+                        Text(
+                            text = "Torneo en ${torneo.city} el ${torneo.date} a las ${torneo.time} (${torneo.categories})",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                        )
+                    }
+                } else {
+                    Text(
+                        text = "No hay torneos disponibles.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontStyle = FontStyle.Italic
+                    )
+                }
+            }
+        }
+    )
+}
+
+
+
 
 @Composable // Utilizamos Composable para decir que estamos definiendo una UI
 // Funcion para añadir texto con unas propiedades concretas
