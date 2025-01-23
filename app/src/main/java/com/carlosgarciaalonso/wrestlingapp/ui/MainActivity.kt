@@ -50,10 +50,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -233,6 +235,7 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>,
                 // Podría definirse directamente la función "getExercisesByCategory" como una función
                 // suspendida y aportar en la propia función el contexto
                 withContext(Dispatchers.IO) {
+                    //delay(5000)
                     //Acceso a la base de datos
                     if (apartadoTecnica != null && apartadoTecnica != "Física") {
                         val result = exerciseRepository.getExercisesByCategory(apartadoTecnica)
@@ -388,6 +391,9 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
 // Esta función aún es muy primitiva pero es la que define la pantalla que se abre cuando se hace
 // click en alguna de las técnicas
 fun PantallaTecnica(tecnicaTitle: String?, exercises: List<String>) {
+
+    //var count by remember { mutableStateOf(0) }
+
     Box(    //Se crea una caja
         modifier = Modifier
             .fillMaxSize()  //Se adapta para que cubra toda la pantalla
@@ -426,6 +432,21 @@ fun PantallaTecnica(tecnicaTitle: String?, exercises: List<String>) {
                     fontStyle = FontStyle.Italic
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+//            // Contador para comprobar que no se bloquea la interfaz grafica al acceder a la base de
+//            // datos
+//            Text(
+//                text = "Contador: $count",
+//                style = MaterialTheme.typography.headlineMedium
+//            )
+//            Spacer(modifier = Modifier.height(16.dp)) // Espacio entre el texto y el botón
+//
+//            // Botón para aumentar el contador
+//            Button(onClick = { count++ }) {
+//                Text(text = "Incrementar")
+//            }
         }
     }
 }
@@ -435,10 +456,11 @@ fun PantallaTecnica(tecnicaTitle: String?, exercises: List<String>) {
 @Composable
 fun PantallaTorneo(database : AppDatabase) {
     val torneos = remember { mutableStateOf<List<TournamentWithCategories>>(emptyList()) }
-
+    //var count by remember { mutableStateOf(0) }
     // Cargar torneos desde la base de datos
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
+            //delay(5000)
             // Consulta los torneos
             val data = database.tournamentDao().getTournamentsWithCategory()
             if (data.isEmpty()) {
@@ -490,6 +512,22 @@ fun PantallaTorneo(database : AppDatabase) {
                         fontStyle = FontStyle.Italic
                     )
                 }
+
+                //Spacer(modifier = Modifier.height(16.dp))
+
+//            // Contador para comprobar que no se bloquea la interfaz grafica al acceder a la base de
+//            // datos
+//                Text(
+//                    text = "Contador: $count",
+//                    style = MaterialTheme.typography.headlineMedium
+//                )
+//                Spacer(modifier = Modifier.height(16.dp)) // Espacio entre el texto y el botón
+//
+//                // Botón para aumentar el contador
+//                Button(onClick = { count++ }) {
+//                    Text(text = "Incrementar")
+//                }
+
             }
         }
     )
