@@ -13,17 +13,12 @@ Adicionalmente podrá contar con un apartado para el seguimiento de torneos o la
 
 ⚠️ Estado del Proyecto: En Desarrollo ⚠️
 
-Este proyecto se encuentra en una fase inicial, aún queda un largo camino por delante. En este momento solo cuenta con una pantalla principal donde se disponen fotos y descripciones de algunas de las principales secciones y un título. Existe una pequeña navegación básica: las imágenes son elementos clickables que redirigen a otra pantalla aún en construcción
+Este proyecto se encuentra en una fase inicial, aún queda un largo camino por delante. En este momento solo cuenta con una pantalla principal donde se disponen fotos y descripciones de algunas de las principales secciones y un título. Existe una pequeña navegación básica: las imágenes son elementos clickables que redirigen a otra pantalla aún en construcción.
 
 
 ## Objetivos
 
 El objetivo es crear una aplicación que permita seguir una progresión y monitorizarla para desarrollar tus habilidades en el campo de la lucha Olímpica, esto incluirá desde progresiones en ejercicios orientados al desarrollo físico (flexibilidad, fuerza...), como a la técnica.
-
-En el futuro, la aplicación incluirá una base de datos que permita:
-
-- Almacenar y monitorizar el progreso del usuario: Registros de entrenamiento, habilidades técnicas trabajadas, progresión de la fuerza, flexibilidad...
-- Almacenar perfiles de usuario personalizados: Cada usuario tendrá su propio perfil, donde podrán ver su historial de entrenamiento y logros.
 
 
 ## Cambios v2.0
@@ -95,18 +90,45 @@ En esta versión se añaden:
 2. Una base de datos con "Room" dedicada a los torneos, los pesos y las categorias:
 
     - Relaciones:
-        - .
-        - .
+      - Hay 3 tablas principales: "categorías", "torneos" y "pesos". Estas tablas se relacionan entre sí en relaciones de muchos a muchos "M:N" por lo que es necesario 
+        crear tablas adicionales que manejen esas relaciones.
+      - Las Categorias y los Torneos se relacionan gracias a una Tabla adicional "TorunamentCategory".
+      - Los pesos y los Torneos se relacionan gracias a una Tabla adicional "TorunamentWeight".
 
     - Entity:
-        - .
+      - Se crea una clase "Entity" para cada una de las tablas. En estas clases se definen las tablas y sus columnas. 
 
     - Dao:
-        - .
+      - Se crea una clase "Dao" para cada una de las tablas. En esta clase se define el CRUD de cada tabla (las consultas).
+
+    - AppDatabase:
+      - Se crea una clase "App" para relacionar las clases Entity y Dao y definir la versión de la base de datos.
+
+   - RoomCallback:
+     - Se crea una clase "Callback" para realizar los inserts iniciales en la base de datos y que no esté vacía.
+     - Los inserts se hacen en segundo plano gracias a que esta clase ejecuta la función dentro de "CoroutineScope(Dispatchers.IO)".
+
+   - WrestlingApplication:
+     - Al igual que con la base de datos de SqLite, se crea una única instancia global en el método onCreate de la clase Application para que la base de datos no abra una
+       nueva instancia con cada consulta.
+
+   - MainActivity:
+     - Para utilizar la base de datos de Room se ha añadido un apartado "torneos" a la pantalla principal de la aplicación. Gracias al NavHost se puede pasar de la 
+       pantalla principal a la pantalla de Torneos. A diferencia de como se accede a la base de datos en mi propuesta de sqLite, no he realizado el acceso a los 
+       datos desde el propio NavHost y le he pasado una lista con la información que se necesita en la pantalla al composable "PantallaTorneo". Es desde el propio
+       composable desde el que accedo a la base de datos para recoger la información de los torneos y las categorías que participan en cada uno de ellos.
+     - La conexión con la base de datos se hace desde un Composable así que como en el ejemplo anterior, se utiliza "LaunchedEffect" combinado con "withContext
+       (Dispatchers.IO)".
+
+   - Anotación 1: Igual que en la otra base de datos; está comentado en el código un botón que aumenta un contador además de "delay(5000)" en el LaunchedEffect para
+     comprobar que la interfaz gráfica no se congela durante el trabajo que se realiza al acceder a la base de datos.
 
 
 ## Próximos pasos 📋
 
+(Pendiente de comprender el funcionamiento y practicar con el ViweModel)
+
 - Definir e introducir todos los apartados principales de la aplicación.
 - Diseñar las pantallas de cada una de estas secciones.
 - Diseñar una pantalla para el perfil del usuario.
+- Organizar en clases todo el "caos" del MainActivity para darle forma al código.
