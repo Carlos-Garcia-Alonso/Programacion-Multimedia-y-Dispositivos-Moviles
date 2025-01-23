@@ -157,6 +157,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //Se guarda la base de datos que se ha instanciado en la clase WrestlingApplication
         val roomDatabase = (application as WrestlingApplication).roomDatabase
         Log.d(TAG, "Se ha abierto la aplicación (onCreate)")
         enableEdgeToEdge()
@@ -218,9 +219,13 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>,
             // argumentos que se pasaron. Por lo tanto "backStackEntry.arguments" incluye los
             // argumentos que se pasaron a esta pantalla. El modificador "?" se pone para que no
             // "pete" aunque sea null.
+
+            //Guarda el contexto del Activity
             val context = LocalContext.current
             //Con el "remember" nos aseguramos de que solo se inicialice una vez
             val exerciseRepository = remember { ExerciseRepository(context) }
+            // En la variable "exercises" se va a guardar la lista con los ejercicios que corresponden
+            // a cada apartado
             val exercises = rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
 
             // En la variable "apartadoTecnica" se almacena el valor asociado a la clave "tituloTecnica"
@@ -235,10 +240,12 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>,
                 // Podría definirse directamente la función "getExercisesByCategory" como una función
                 // suspendida y aportar en la propia función el contexto
                 withContext(Dispatchers.IO) {
-                    //delay(5000)
+                    //delay(5000)   //Para asegurarnos de que se ejecuta en segundo plano
                     //Acceso a la base de datos
                     if (apartadoTecnica != null && apartadoTecnica != "Física") {
+                        //Se extrae la lista de ejercicios de la base de datos
                         val result = exerciseRepository.getExercisesByCategory(apartadoTecnica)
+                        //Se guarda en la lista
                         exercises.value = result
                     } else if (apartadoTecnica == "Física") {
                         val result = exerciseRepository.getExercisesForFisica()
@@ -247,12 +254,15 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>,
                 }
             }
 
-            //Por último se pasa ese string a la función para mostrar la pantalla
+            // Por último se pasa el string con el apartado y la lista de ejercicios a la función
+            // composable encargada de mostrar la información por pantalla
             PantallaTecnica(tecnicaTitle = apartadoTecnica, exercises = exercises.value)
         }
         //Pantalla para los torneos
         composable(route = "torneos") {
 
+            //Se pasa la instancia de la base de datos de room a la pantalla encargada de mostrar
+            // la información de los torneos
             PantallaTorneo(roomDatabase)
 
         }
@@ -291,7 +301,7 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
                 ),
                 navigationIcon = {
                     // Botón de menú con la acción personalizada
-                    IconButton(onClick = { onclick("Perfil") }) {
+                    IconButton(onClick = { /*onclick("Perfil")*/ }) {
                         Icon(
                             Icons.Filled.AccountCircle, // Cambia esto si quieres otro icono
                             contentDescription = "Perfil"
@@ -455,26 +465,34 @@ fun PantallaTecnica(tecnicaTitle: String?, exercises: List<String>) {
 
 @Composable
 fun PantallaTorneo(database : AppDatabase) {
+
+    //Variable que almacena en una lista los objetos "TournamentWithCategories"
     val torneos = remember { mutableStateOf<List<TournamentWithCategories>>(emptyList()) }
+
     //var count by remember { mutableStateOf(0) }
-    // Cargar torneos desde la base de datos
+
+    // Cargar torneos desde la base de datos en segundo plano (mismo procedimiento que con la
+    // primera base de datos de sqlite):
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
+
             //delay(5000)
-            // Consulta los torneos
+
+            // Consulta los torneos (esta consulta se realiza en segundo plano)
             val data = database.tournamentDao().getTournamentsWithCategory()
             if (data.isEmpty()) {
                 // Inserta datos iniciales si no existen
+                // En este caso como solo tengo que manejar los torneos, he implementado la lógica
+                // para que en caso de que la base de datos esté vacía, se inserten los datos
                 RoomCallback(database).datosIniciales(database)
                 // Recarga los torneos después de la inserción
                 val newData = database.tournamentDao().getTournamentsWithCategory()
-                withContext(Dispatchers.Main) {
-                    torneos.value = newData
-                }
+                //Se actualiza el valor de la lista con los datos extraidos de la base de datos
+                torneos.value = newData
+
             } else {
-                withContext(Dispatchers.Main) {
-                    torneos.value = data
-                }
+                //Se actualiza el valor de la lista con los datos extraidos de la base de datos
+                torneos.value = data
             }
         }
     }
@@ -500,7 +518,8 @@ fun PantallaTorneo(database : AppDatabase) {
                 if (torneos.value.isNotEmpty()) {
                     torneos.value.forEach { torneo ->
                         Text(
-                            text = "Torneo en ${torneo.city} el ${torneo.date} a las ${torneo.time} (${torneo.categories})",
+                            text = "Torneo en ${torneo.city} el ${torneo.date} a las ${torneo.time} " +
+                                    "(${torneo.categories})",
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
                         )

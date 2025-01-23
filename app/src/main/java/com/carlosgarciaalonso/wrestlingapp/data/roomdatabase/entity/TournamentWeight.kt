@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
+//Clase que define la tabla que relaciona torneos y pesos
 @Entity(
     tableName = "tournament_weights",
     foreignKeys = [

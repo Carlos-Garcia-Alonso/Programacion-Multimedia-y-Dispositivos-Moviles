@@ -2,6 +2,8 @@ package com.carlosgarciaalonso.wrestlingapp.data.sqlitedb
 
 import android.provider.BaseColumns
 
+// Clase contrato encargada de definir las tablas de la base de datos de sqLite
+
 object WrestlingSqliteContract {
 
     // Tabla de usuarios

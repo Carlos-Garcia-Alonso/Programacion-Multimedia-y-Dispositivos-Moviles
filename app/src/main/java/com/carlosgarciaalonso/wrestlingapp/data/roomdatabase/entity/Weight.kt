@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
+//Clase que define la tabla de pesos
 @Entity(
     tableName = "weights",
     foreignKeys = [

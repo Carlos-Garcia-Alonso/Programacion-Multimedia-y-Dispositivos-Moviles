@@ -7,7 +7,7 @@ import com.carlosgarciaalonso.wrestlingapp.WrestlingApplication
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteContract
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteHelper
 
-
+// Clase repositorio con las funciones necesarias para realizar el CRUD de la tabla de usuario
 class UserRepository(context: Context) {
     private val dbHelper = (context.applicationContext as WrestlingApplication).dbHelper
 

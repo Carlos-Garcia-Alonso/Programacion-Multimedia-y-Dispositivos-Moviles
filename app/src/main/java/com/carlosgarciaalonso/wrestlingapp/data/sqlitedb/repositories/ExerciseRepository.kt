@@ -9,6 +9,7 @@ import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+// Clase repositorio con las funciones necesarias para realizar el CRUD de la tabla de ejercicios
 class ExerciseRepository(context: Context) {
     // Se crea una variable "dbHelper" que reutiliza la instancia definida en la clase
     // "WrestlingApplication". Esto asegura que, independientemente del repositorio que acceda a la base

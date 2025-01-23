@@ -12,6 +12,8 @@ import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.*
 // insertarán a través de un "callback" en la clase "WrestlingApplication"
 class RoomCallback(private val database: AppDatabase) : RoomDatabase.Callback() {
 
+    // Se utiliza una corutina para hacer los inserts iniciales sin bloquear la interfaz
+    // Esta función se ejecutará la primera vez que se cree la base de datos
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
         CoroutineScope(Dispatchers.IO).launch {
@@ -35,6 +37,8 @@ class RoomCallback(private val database: AppDatabase) : RoomDatabase.Callback() 
             CategoryRoom(name = "Lucha Libre Junior Femenina", min_age = 15, max_age = 17)
         )
 
+        //Se guardan los ids de los valores que se introducen para utilizarlos en las claves
+        // foráneas de los inserts de las otras tablas
         val categoryIds = mutableListOf<Long>()
         categories.forEach { category ->
             val id = categoryDao.insertCategory(category)
@@ -48,6 +52,8 @@ class RoomCallback(private val database: AppDatabase) : RoomDatabase.Callback() 
             Tournament(date = "2025-01-25", city = "Santiago", time = "09:00")
         )
 
+        //Se guardan los ids de los valores que se introducen para utilizarlos en las claves
+        // foráneas de los inserts de las otras tablas
         val tournamentIds = mutableListOf<Long>()
         for (tournament in tournaments) {
             val id = tournamentDao.insertTournament(tournament)
@@ -78,13 +84,15 @@ class RoomCallback(private val database: AppDatabase) : RoomDatabase.Callback() 
             Weight(weight = 45.0, category_id = categoryIds[3].toInt()),
         )
 
+        //Se guardan los ids de los valores que se introducen para utilizarlos en las claves
+        // foráneas de los inserts de las otras tablas
         val weightIds = mutableListOf<Long>()
         for (weight in weights) {
             val id = weightDao.insertWeight(weight)
             weightIds.add(id)
         }
 
-        // Inserta datos iniciales para TournamentCategory
+        // Inserta datos iniciales para TournamentCategory (Se asocian id de torneo e id de categoria)
         val tournamentCategories = listOf(
             TournamentCategory(
                 tournament_id = tournamentIds[0].toInt(),
@@ -116,7 +124,7 @@ class RoomCallback(private val database: AppDatabase) : RoomDatabase.Callback() 
             tournamentCategoryDao.insertTournamentCategory(tournamentCategory)
         }
 
-        // Inserta datos iniciales para TournamentWeight
+        // Inserta datos iniciales para TournamentWeight (Se asocian id de torneo e id de peso)
         val tournamentWeights = listOf(
             // Torneo 0 (Lucha Libre Senior Masculina y Femenina)
             TournamentWeight(tournament_id = tournamentIds[0].toInt(), weight_id = weightIds[0].toInt()), // Senior Masculina - Peso 65.0

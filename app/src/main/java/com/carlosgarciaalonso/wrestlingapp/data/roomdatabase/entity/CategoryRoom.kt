@@ -3,6 +3,7 @@ package com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+//Clase que define la tabla de categorías
 @Entity(tableName = "categories")
 data class CategoryRoom(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

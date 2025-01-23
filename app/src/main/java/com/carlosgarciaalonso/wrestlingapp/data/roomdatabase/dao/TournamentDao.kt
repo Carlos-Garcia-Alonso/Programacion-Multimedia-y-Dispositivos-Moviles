@@ -4,9 +4,12 @@ import androidx.room.*
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.Tournament
 
+// Dao con las funciones necesarias para realizar el CRUD de la tabla de torneos
 @Dao
 interface TournamentDao {
     @Insert
+    // Cuando una función se marca como "suspend" en el Dao, Room ya se encarga de ejecutarla en
+    // segundo plano y no es necesario utilizar "withContext(Dispatchers.IO)"
     suspend fun insertTournament(tournament: Tournament): Long
 
     @Query("SELECT * FROM tournaments ORDER BY date ASC")
