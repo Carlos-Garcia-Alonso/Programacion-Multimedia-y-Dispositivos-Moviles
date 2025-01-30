@@ -10,12 +10,14 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.AppDatabase
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.RoomCallback
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteHelper
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
+@HiltAndroidApp
 class WrestlingApplication : Application() {
 
     //lateinit se utiliza para declarar una variable que no puede ser null pero que no vas a
