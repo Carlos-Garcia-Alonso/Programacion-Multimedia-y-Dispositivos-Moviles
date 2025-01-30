@@ -50,6 +50,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +63,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -73,6 +75,8 @@ import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.RoomCallback
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.Tournament
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.repositories.ExerciseRepository
+import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TorneoViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -88,6 +92,7 @@ import kotlinx.coroutines.withContext
 data class Tecnica(val imageRes: Int, val title: String)
 
 // Esta clase es el punto de entrada de la app (algo así como el "Main" del Compose)
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     val TAG = this.javaClass.simpleName
@@ -158,7 +163,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //Se guarda la base de datos que se ha instanciado en la clase WrestlingApplication
-        val roomDatabase = (application as WrestlingApplication).roomDatabase
         Log.d(TAG, "Se ha abierto la aplicación (onCreate)")
         enableEdgeToEdge()
         // Esta función se utiliza para definir el contenido en pantalla:
@@ -181,7 +185,7 @@ class MainActivity : ComponentActivity() {
                 // de la interfaz, la aplicación recuerde el punto en el que se encontraba. Si no podría
                 // ocurrir que el usuario volviese a la pantalla principal y perdiese lo que estaba viendo
                 val navController = rememberNavController()
-                SetupNavGraph(navController = navController, tecnicasList = tecnicasList, roomDatabase)
+                SetupNavGraph(navController = navController, tecnicasList = tecnicasList)
             }
         }
     }
@@ -193,7 +197,7 @@ class MainActivity : ComponentActivity() {
 // "navController" es el controlador que indica como se viaja de una pantalla a otra
 // "tecnicasList" es la lista de técnicas, se pasa como parámetro para poder tener acceso a esos datos
 // desde las distintas pantallas
-fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>, roomDatabase: AppDatabase) {
+fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>) {
     NavHost(
         //Se asigna el controlador de navegación que se pasa como parámetro
         navController = navController,
@@ -263,7 +267,7 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>,
 
             //Se pasa la instancia de la base de datos de room a la pantalla encargada de mostrar
             // la información de los torneos
-            PantallaTorneo(roomDatabase)
+            PantallaTorneo()
 
         }
     }
@@ -464,38 +468,12 @@ fun PantallaTecnica(tecnicaTitle: String?, exercises: List<String>) {
 
 
 @Composable
-fun PantallaTorneo(database : AppDatabase) {
-
-    //Variable que almacena en una lista los objetos "TournamentWithCategories"
-    val torneos = remember { mutableStateOf<List<TournamentWithCategories>>(emptyList()) }
-
-    //var count by remember { mutableStateOf(0) }
-
-    // Cargar torneos desde la base de datos en segundo plano (mismo procedimiento que con la
-    // primera base de datos de sqlite):
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-
-            //delay(5000)
-
-            // Consulta los torneos (esta consulta se realiza en segundo plano)
-            val data = database.tournamentDao().getTournamentsWithCategory()
-            if (data.isEmpty()) {
-                // Inserta datos iniciales si no existen
-                // En este caso como solo tengo que manejar los torneos, he implementado la lógica
-                // para que en caso de que la base de datos esté vacía, se inserten los datos
-                RoomCallback(database).datosIniciales(database)
-                // Recarga los torneos después de la inserción
-                val newData = database.tournamentDao().getTournamentsWithCategory()
-                //Se actualiza el valor de la lista con los datos extraidos de la base de datos
-                torneos.value = newData
-
-            } else {
-                //Se actualiza el valor de la lista con los datos extraidos de la base de datos
-                torneos.value = data
-            }
-        }
-    }
+fun PantallaTorneo(
+    // HiltViewModel infla el ViewModel sin que tú lo crees manualmente
+    torneoViewModel: TorneoViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+) {
+    // Observa el StateFlow
+    val torneos by torneoViewModel.tournaments.collectAsState()
 
     Scaffold (
         modifier = Modifier.fillMaxSize(),
@@ -515,8 +493,8 @@ fun PantallaTorneo(database : AppDatabase) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Mostrar la lista de torneos
-                if (torneos.value.isNotEmpty()) {
-                    torneos.value.forEach { torneo ->
+                if (torneos.isNotEmpty()) {
+                    torneos.forEach { torneo ->
                         Text(
                             text = "Torneo en ${torneo.city} el ${torneo.date} a las ${torneo.time} " +
                                     "(${torneo.categories})",

@@ -28,7 +28,7 @@ class WrestlingApplication : Application() {
     // y no se creen múltiples instancias de la base de datos durante la ejecución.
     lateinit var dbHelper: WrestlingSqliteHelper
 
-    lateinit var roomDatabase: AppDatabase // Lateinit para la base de datos de Room
+//    lateinit var roomDatabase: AppDatabase // Lateinit para la base de datos de Room
     // Esta variable define la corutina para que el insert de datos iniciales de la base de datos de
     // Room con el callback se realice en segundo plano.
     private val applicationScope = CoroutineScope(Job() + Dispatchers.IO)
@@ -43,11 +43,11 @@ class WrestlingApplication : Application() {
 
 
         // Inicialización única de la base de datos Room
-        roomDatabase = Room.databaseBuilder(
-            this,
-            AppDatabase::class.java,
-            "tournament_database" // Nombre de la base de datos
-        ) .build()
+//        roomDatabase = Room.databaseBuilder(
+//            this,
+//            AppDatabase::class.java,
+//            "tournament_database" // Nombre de la base de datos
+//        ) .build()
 
     }
 
