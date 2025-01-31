@@ -6,6 +6,7 @@ import com.carlosgarciaalonso.wrestlingapp.data.repository.TorneoRepository
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -32,6 +33,9 @@ class TorneoViewModel @Inject constructor(
     private fun loadTournaments() {
         // Se lanza una corrutina en el scope del ViewModel
         viewModelScope.launch(Dispatchers.IO) {
+
+            //delay(5000)
+
             // Verificar si la BD está vacía y, de ser así, rellenarla
             repository.insertInitialDataIfNeeded()
 

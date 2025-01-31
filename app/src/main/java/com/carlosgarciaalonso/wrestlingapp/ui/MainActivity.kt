@@ -475,6 +475,8 @@ fun PantallaTorneo(
     // Observa el StateFlow
     val torneos by torneoViewModel.tournaments.collectAsState()
 
+    //var count by remember { mutableStateOf(0) }
+
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         content = { autoPadding ->
@@ -510,7 +512,7 @@ fun PantallaTorneo(
                     )
                 }
 
-                //Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
 //            // Contador para comprobar que no se bloquea la interfaz grafica al acceder a la base de
 //            // datos
