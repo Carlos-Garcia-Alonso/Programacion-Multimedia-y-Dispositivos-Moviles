@@ -8,7 +8,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,29 +23,23 @@ class TorneoViewModel @Inject constructor(
     private val repository: TorneoRepository
 ) : ViewModel() {
 
-    // Encapsulamos la lista de torneos en un StateFlow
-    private val _tournaments = MutableStateFlow<List<TournamentWithCategories>>(emptyList())
-    val tournaments: StateFlow<List<TournamentWithCategories>> = _tournaments
+    /**
+     * Convertimos el Flow de Room en un StateFlow,
+     * para poder usar collectAsState() en la UI.
+     */
+    val tournaments: StateFlow<List<TournamentWithCategories>> =
+        repository.getAllTournamentsWithCategoriesFlow()
+            // stateIn() crea un StateFlow a partir de un Flow
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
 
     init {
-        // Cargar los torneos al inicializar el ViewModel
-        loadTournaments()
-    }
-
-    private fun loadTournaments() {
-        // Se lanza una corrutina en el scope del ViewModel
+        // Opcional: insertar datos iniciales en segundo plano.
         viewModelScope.launch(Dispatchers.IO) {
-
-            //delay(5000)
-
-            // Verificar si la BD está vacía y, de ser así, rellenarla
             repository.insertInitialDataIfNeeded()
-
-            // Consultar la lista de torneos con categorías
-            val data = repository.getAllTournamentsWithCategories()
-
-            // Actualizar el StateFlow con los datos obtenidos
-            _tournaments.value = data
         }
     }
 }

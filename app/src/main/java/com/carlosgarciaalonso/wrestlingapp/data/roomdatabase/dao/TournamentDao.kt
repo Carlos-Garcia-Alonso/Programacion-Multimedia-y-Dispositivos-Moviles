@@ -3,6 +3,7 @@ package com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.dao
 import androidx.room.*
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.Tournament
+import kotlinx.coroutines.flow.Flow
 
 // Dao con las funciones necesarias para realizar el CRUD de la tabla de torneos
 @Dao
@@ -23,7 +24,7 @@ interface TournamentDao {
     GROUP BY t.id
     ORDER BY t.date ASC
 """)
-    suspend fun getTournamentsWithCategory(): List<TournamentWithCategories>
+    fun getTournamentsWithCategoryFlow(): Flow<List<TournamentWithCategories>>
 
     @Update
     suspend fun updateTournament(tournament: Tournament): Int
