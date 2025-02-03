@@ -78,6 +78,7 @@ import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.RoomCallback
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.Tournament
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.repositories.ExerciseRepository
+import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.ChuckNorrisViewModel
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TorneoViewModel
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.hilt.android.AndroidEntryPoint
@@ -498,7 +499,7 @@ fun PantallaTecnica(tecnicaTitle: String?, exercises: List<String>) {
 @Composable
 fun PantallaTorneo(
     // HiltViewModel infla el ViewModel sin que tú lo crees manualmente
-    torneoViewModel: TorneoViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    torneoViewModel: TorneoViewModel = hiltViewModel()
 ) {
     // Observa el StateFlow
     val torneos by torneoViewModel.tournaments.collectAsState()
@@ -561,24 +562,13 @@ fun PantallaTorneo(
 }
 
 @Composable
-fun PantallaChuckNorris() {
+fun PantallaChuckNorris(
+    // Inyecta el ViewModel automáticamente
+    viewModel: ChuckNorrisViewModel = hiltViewModel()
+) {
 
-    var consejo by rememberSaveable { mutableStateOf("") }
-
-    // Creamos un scope de corrutina que se vincule al ciclo de vida del composable
-    val coroutineScope = rememberCoroutineScope()
-
-    //Esto es necesario cuando la api devuelve más claves de las que se están manejando en la clase
-    val json = Json{
-        ignoreUnknownKeys = true
-    }
-    val contentType = "application/json".toMediaType()
-    val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.chucknorris.io/")
-        .addConverterFactory(json.asConverterFactory(contentType))
-        .build()
-
-    val service = retrofit.create(ChuckNorrisService::class.java)
+    // Observamos el StateFlow con collectAsState()
+    val consejo by viewModel.consejo.collectAsState()
 
     Scaffold (
         modifier = Modifier.fillMaxSize(),
@@ -617,26 +607,11 @@ fun PantallaChuckNorris() {
                 Button(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     onClick = {
-                        // Lanzamos otra corrutina para pedir otra broma
-                        coroutineScope.launch {
-                            val nuevaBroma = withContext(Dispatchers.IO) {
-                                service.getRandomJoke()
-                            }
-                            consejo = nuevaBroma.broma
-                        }
+                        // Llamamos de nuevo al ViewModel para obtener otro chiste
+                        viewModel.fetchOtroConsejo()
                     }
                 ) {
                     Text(text = "Otro consejo")
-                }
-
-                //Como service.getRandomJoke() es una función suspendida es necesario llamarla desde una corutina:
-                LaunchedEffect(Unit) {
-                    withContext(Dispatchers.IO) {
-                        val bromaAleatoria = service.getRandomJoke()
-                        consejo = bromaAleatoria.broma
-                        Log.d("Bromita", "$bromaAleatoria")
-                    }
-
                 }
             }
         }

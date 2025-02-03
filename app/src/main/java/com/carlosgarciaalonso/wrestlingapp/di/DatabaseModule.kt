@@ -36,7 +36,7 @@ object DatabaseModule {
         ).build()
     }
 
-    // Proveemos los DAOs (opcional, solo si planeas inyectar DAOs directamente).
+    // Proveemos los DAOs (opcional, solo si se planea inyectar DAOs directamente).
     @Provides
     fun provideTournamentDao(db: AppDatabase): TournamentDao = db.tournamentDao()
 
