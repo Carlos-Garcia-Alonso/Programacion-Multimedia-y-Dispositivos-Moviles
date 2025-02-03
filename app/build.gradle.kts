@@ -5,6 +5,7 @@ plugins {   //plugins de módulo
     id("com.google.devtools.ksp")
     id("androidx.room")
     id("com.google.dagger.hilt.android")
+    kotlin("plugin.serialization") version "2.1.0"
 }
 
 android {
@@ -55,8 +56,15 @@ android {
 
 dependencies {
 
-    //Hilt:
+    //Error MediaType:
+    implementation("com.squareup.okhttp3:okhttp:+")
 
+    //Retrofit
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:+")
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:+")
+    implementation ("com.squareup.retrofit2:retrofit:(insert latest version)")
+
+    //Hilt:
     implementation("com.google.dagger:hilt-android:2.51.1")
     ksp("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")

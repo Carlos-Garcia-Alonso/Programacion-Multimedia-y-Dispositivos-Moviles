@@ -57,6 +57,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -70,19 +71,27 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.carlosgarciaalonso.wrestlingapp.R
 import com.carlosgarciaalonso.wrestlingapp.WrestlingApplication
+import com.carlosgarciaalonso.wrestlingapp.data.network.ChuckNorrisService
+import com.carlosgarciaalonso.wrestlingapp.data.network.RandomJokeReponse
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.AppDatabase
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.RoomCallback
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.Tournament
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.repositories.ExerciseRepository
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TorneoViewModel
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import retrofit2.Retrofit
+import okhttp3.MediaType.Companion.toMediaType
 
 // Clase para los grupos de imagenes y técnicas
 // La diferencia entre una clase normal y una "data class" es que la "data class" no necesita declarar
@@ -107,6 +116,8 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "Aplicación reanudada (onResume)")
+
+
     }
 
     override fun onPause() {
@@ -265,10 +276,12 @@ fun SetupNavGraph(navController: NavHostController, tecnicasList: List<Tecnica>)
         //Pantalla para los torneos
         composable(route = "torneos") {
 
-            //Se pasa la instancia de la base de datos de room a la pantalla encargada de mostrar
-            // la información de los torneos
             PantallaTorneo()
 
+        }
+        //Pantalla para los consejos
+        composable(route = "chucknorris"){
+            PantallaChuckNorris()
         }
     }
 }
@@ -384,6 +397,21 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
                         // Cuando se hace click sobre él, se pasa a la funcion "onclick" el
                         // string con el nombre de la técnica para que se añada a la navController
                         onclick("torneos")
+                    }
+                        .padding(start = 16.dp, end = 16.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ImagenTexto(
+                    imageRes = R.drawable.chuck_norris,
+                    text = "¿Buscas Motivación?",
+                    // El contenedor se hace "clickable" para que se pueda hacer click sobre él
+                    // (evidentemente)
+                    modifier = Modifier.clickable {
+                        // Cuando se hace click sobre él, se pasa a la funcion "onclick" el
+                        // string con el nombre de la técnica para que se añada a la navController
+                        onclick("chucknorris")
                     }
                         .padding(start = 16.dp, end = 16.dp)
                 )
@@ -532,6 +560,88 @@ fun PantallaTorneo(
     )
 }
 
+@Composable
+fun PantallaChuckNorris() {
+
+    var consejo by rememberSaveable { mutableStateOf("") }
+
+    // Creamos un scope de corrutina que se vincule al ciclo de vida del composable
+    val coroutineScope = rememberCoroutineScope()
+
+    //Esto es necesario cuando la api devuelve más claves de las que se están manejando en la clase
+    val json = Json{
+        ignoreUnknownKeys = true
+    }
+    val contentType = "application/json".toMediaType()
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.chucknorris.io/")
+        .addConverterFactory(json.asConverterFactory(contentType))
+        .build()
+
+    val service = retrofit.create(ChuckNorrisService::class.java)
+
+    Scaffold (
+        modifier = Modifier.fillMaxSize(),
+        content = { autoPadding ->
+            Column(Modifier
+                .fillMaxSize()
+                .padding(autoPadding)
+                .verticalScroll(rememberScrollState())
+            ) {
+                // Mostrar el título de la técnica
+                Text(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                        .padding(15.dp),
+                    text = "¿Necesitas motivación?",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                        .padding(15.dp),
+                    text = "No hay nada mejor que aplicar las enseñanzas de un gurú de las artes marciales:",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                        .padding(15.dp),
+                    text = consejo,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = {
+                        // Lanzamos otra corrutina para pedir otra broma
+                        coroutineScope.launch {
+                            val nuevaBroma = withContext(Dispatchers.IO) {
+                                service.getRandomJoke()
+                            }
+                            consejo = nuevaBroma.broma
+                        }
+                    }
+                ) {
+                    Text(text = "Otro consejo")
+                }
+
+                //Como service.getRandomJoke() es una función suspendida es necesario llamarla desde una corutina:
+                LaunchedEffect(Unit) {
+                    withContext(Dispatchers.IO) {
+                        val bromaAleatoria = service.getRandomJoke()
+                        consejo = bromaAleatoria.broma
+                        Log.d("Bromita", "$bromaAleatoria")
+                    }
+
+                }
+            }
+        }
+    )
+}
 
 
 
