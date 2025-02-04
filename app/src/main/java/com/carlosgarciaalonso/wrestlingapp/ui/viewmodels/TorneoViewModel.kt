@@ -21,21 +21,33 @@ class TorneoViewModel @Inject constructor(
     private val repository: TorneoRepository
 ) : ViewModel() {
 
-    //Convertimos el Flow de Room en un StateFlow, para poder usar collectAsState() en la UI.
-    val tournaments: StateFlow<List<TournamentWithCategories>> =
-        repository.getAllTournamentsWithCategoriesFlow()
-            // stateIn() crea un StateFlow a partir de un Flow
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList()
-            )
+    // MutableStateFlow privado para manejar los estados
+    private val _state = MutableStateFlow<TournamentsState>(TournamentsState.Loading)
+    val state: StateFlow<TournamentsState> = _state // Exposición pública
 
     init {
-        // Insertar datos iniciales en segundo plano.
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.insertInitialDataIfNeeded()
+        viewModelScope.launch {
+            _state.value = TournamentsState.Loading // Emitimos estado de carga
+            try {
+                // Insertamos datos iniciales si es necesario
+                repository.insertInitialDataIfNeeded()
+
+                // Comenzamos a recolectar los datos en tiempo real
+                repository.getAllTournamentsWithCategoriesFlow().collect { tournaments ->
+                    // Emitimos el estado de éxito con los datos obtenidos
+                    _state.value = TournamentsState.Success(tournaments)
+                }
+            } catch (e: Exception) {
+                // En caso de error, emitimos un estado de error
+                _state.value = TournamentsState.Error("Error al cargar los datos.")
+            }
         }
     }
+}
+
+sealed interface TournamentsState {
+    object Loading : TournamentsState
+    data class Success(val data: List<TournamentWithCategories>) : TournamentsState
+    data class Error(val message: String) : TournamentsState
 }
 

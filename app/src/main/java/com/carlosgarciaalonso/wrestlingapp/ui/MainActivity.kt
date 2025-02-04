@@ -40,6 +40,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
@@ -82,6 +83,7 @@ import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.Tournament
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.repositories.ExerciseRepository
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.ChuckNorrisViewModel
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TorneoViewModel
+import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TournamentsState
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -504,7 +506,7 @@ fun PantallaTorneo(
     torneoViewModel: TorneoViewModel = hiltViewModel()
 ) {
     // Observa el StateFlow
-    val torneos by torneoViewModel.tournaments.collectAsState()
+    val state by torneoViewModel.state.collectAsState()
 
     //var count by remember { mutableStateOf(0) }
 
@@ -525,23 +527,44 @@ fun PantallaTorneo(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Mostrar la lista de torneos
-                if (torneos.isNotEmpty()) {
-                    torneos.forEach { torneo ->
+                when (state) {
+                    is TournamentsState.Loading -> {
+                        // Mostrar un indicador de carga
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    }
+
+                    is TournamentsState.Success -> {
+                        val torneos = (state as TournamentsState.Success).data
+                        // Mostrar la lista de torneos
+                        if (torneos.isNotEmpty()) {
+                            torneos.forEach { torneo ->
+                                Text(
+                                    text = "Torneo en ${torneo.city} el ${torneo.date} a las ${torneo.time} " +
+                                            "(${torneo.categories})",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = "No hay torneos disponibles.",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontStyle = FontStyle.Italic
+                            )
+                        }
+                    }
+
+                    is TournamentsState.Error -> {
+                        val errorMessage = (state as TournamentsState.Error).message
+                        // Mostrar un mensaje de error
                         Text(
-                            text = "Torneo en ${torneo.city} el ${torneo.date} a las ${torneo.time} " +
-                                    "(${torneo.categories})",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                            text = errorMessage,
+                            color = Color.Red,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
                         )
                     }
-                } else {
-                    Text(
-                        text = "No hay torneos disponibles.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontStyle = FontStyle.Italic
-                    )
                 }
+
 
                 Spacer(modifier = Modifier.height(16.dp))
 
