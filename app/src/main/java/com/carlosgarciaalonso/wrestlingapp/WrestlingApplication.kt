@@ -31,7 +31,7 @@ class WrestlingApplication : Application() {
 //    lateinit var roomDatabase: AppDatabase // Lateinit para la base de datos de Room
     // Esta variable define la corutina para que el insert de datos iniciales de la base de datos de
     // Room con el callback se realice en segundo plano.
-    private val applicationScope = CoroutineScope(Job() + Dispatchers.IO)
+    //private val applicationScope = CoroutineScope(Job() + Dispatchers.IO)
 
     val TAG = "WrestlingApplication"
 
@@ -54,7 +54,7 @@ class WrestlingApplication : Application() {
     override fun onTerminate() {
         super.onTerminate()
         dbHelper.close()
-        applicationScope.cancel() // Cancela todas las coroutines asociadas
+        //applicationScope.cancel() // Cancela todas las coroutines asociadas
         Log.d(TAG, "La aplicación se ha cerrado por completo")
     }
 

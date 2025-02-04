@@ -8,25 +8,20 @@ import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Repositorio para manejar la lógica de acceso a la tabla de torneos
- * (y sus categorías, pesos, etc.) en Room.
- */
+
+// Repositorio para manejar la lógica de acceso a la tabla de torneos (y sus categorías, pesos, etc.)
+// en Room.
 @Singleton
 class TorneoRepository @Inject constructor(
     private val db: AppDatabase
 ) {
 
-    /**
-     * Devuelve un Flow con la lista de torneos + categorías.
-     */
+    //Devuelve un Flow con la lista de torneos + categorías.
     fun getAllTournamentsWithCategoriesFlow(): Flow<List<TournamentWithCategories>> {
         return db.tournamentDao().getTournamentsWithCategoryFlow()
     }
 
-    /**
-     * Ejemplo de insertar datos si la BD está vacía.
-     */
+    //Insertar datos si la Base de Datos está vacía
     suspend fun insertInitialDataIfNeeded() {
         // Aquí haces la lógica de insert si procede
         val data = db.tournamentDao().getTournamentsWithCategoryFlow().firstOrNull()

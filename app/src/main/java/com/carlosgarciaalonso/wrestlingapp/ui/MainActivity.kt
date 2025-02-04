@@ -57,6 +57,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -69,6 +70,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.carlosgarciaalonso.wrestlingapp.R
 import com.carlosgarciaalonso.wrestlingapp.WrestlingApplication
 import com.carlosgarciaalonso.wrestlingapp.data.network.ChuckNorrisService
@@ -570,6 +572,8 @@ fun PantallaChuckNorris(
     // Observamos el StateFlow con collectAsState()
     val consejo by viewModel.consejo.collectAsState()
 
+    val imagenUrl by viewModel.imagenUrl.collectAsState() // Observar la imagen
+
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         content = { autoPadding ->
@@ -578,7 +582,6 @@ fun PantallaChuckNorris(
                 .padding(autoPadding)
                 .verticalScroll(rememberScrollState())
             ) {
-                // Mostrar el título de la técnica
                 Text(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                                         .padding(15.dp),
@@ -602,6 +605,15 @@ fun PantallaChuckNorris(
                     color = MaterialTheme.colorScheme.tertiary,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                // Mostrar la imagen de Chuck Norris usando AsyncImage (Coil)
+                AsyncImage(
+                    model = imagenUrl,  // Cargar la URL de la imagen
+                    contentDescription = "Imagen de Chuck Norris",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp) // Tamaño de la imagen
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(

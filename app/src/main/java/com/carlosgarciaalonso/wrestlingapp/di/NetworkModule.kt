@@ -11,6 +11,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import javax.inject.Singleton
 
+//Módulo de Hilt para proveer la instancia de Retrofit y de ChuckNorrisService.
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {

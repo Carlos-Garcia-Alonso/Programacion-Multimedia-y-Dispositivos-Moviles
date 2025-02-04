@@ -14,19 +14,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * ViewModel para la pantalla de Torneos. Maneja la carga de datos desde
- * TorneoRepository y los expone como StateFlow para la UI.
- */
+// ViewModel para la pantalla de Torneos. Maneja la solicitud de datos desde TorneoRepository y
+// los refleja como StateFlow para la UI.
 @HiltViewModel
 class TorneoViewModel @Inject constructor(
     private val repository: TorneoRepository
 ) : ViewModel() {
 
-    /**
-     * Convertimos el Flow de Room en un StateFlow,
-     * para poder usar collectAsState() en la UI.
-     */
+    //Convertimos el Flow de Room en un StateFlow, para poder usar collectAsState() en la UI.
     val tournaments: StateFlow<List<TournamentWithCategories>> =
         repository.getAllTournamentsWithCategoriesFlow()
             // stateIn() crea un StateFlow a partir de un Flow
@@ -37,7 +32,7 @@ class TorneoViewModel @Inject constructor(
             )
 
     init {
-        // Opcional: insertar datos iniciales en segundo plano.
+        // Insertar datos iniciales en segundo plano.
         viewModelScope.launch(Dispatchers.IO) {
             repository.insertInitialDataIfNeeded()
         }

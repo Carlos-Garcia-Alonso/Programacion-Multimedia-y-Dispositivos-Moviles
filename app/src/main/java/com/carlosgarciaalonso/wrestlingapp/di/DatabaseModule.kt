@@ -15,10 +15,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Módulo de Hilt para proveer la instancia de RoomDatabase (AppDatabase)
- * y los DAOs que vayamos a inyectar.
- */
+//Módulo de Hilt para proveer la instancia de RoomDatabase (AppDatabase) y los DAOs que se van a inyectar.
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -36,7 +33,7 @@ object DatabaseModule {
         ).build()
     }
 
-    // Proveemos los DAOs (opcional, solo si se planea inyectar DAOs directamente).
+    // (opcional, solo si se planea inyectar DAOs directamente).
     @Provides
     fun provideTournamentDao(db: AppDatabase): TournamentDao = db.tournamentDao()
 

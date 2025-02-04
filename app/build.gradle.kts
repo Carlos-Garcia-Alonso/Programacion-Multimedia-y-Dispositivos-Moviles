@@ -56,6 +56,9 @@ android {
 
 dependencies {
 
+    //Para poder usar AsyncImage
+    implementation("io.coil-kt:coil-compose:2.2.2")
+
     //Error MediaType:
     implementation("com.squareup.okhttp3:okhttp:+")
 

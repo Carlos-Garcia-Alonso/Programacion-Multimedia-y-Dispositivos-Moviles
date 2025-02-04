@@ -1,5 +1,6 @@
 package com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity
 
+import android.text.Html.ImageGetter
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

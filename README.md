@@ -124,6 +124,59 @@ En esta versión se añaden:
      comprobar que la interfaz gráfica no se congela durante el trabajo que se realiza al acceder a la base de datos.
 
 
+## Cambios v4.0
+
+En esta versión se mueve la lógica de la base de datos de Room para trabajar con Hilt y ViewModel. Además se incorpora el acceso a internet con Retrofit:
+
+1. Acceso a internet:
+
+    - ChuckNorrisService:
+        - El primer paso es crear una interfaz en la que se definen los métodos necesarios para acceder a la información de la api con "@GET" (En caso de necesitarlos también habria que definir aquí los @POST, @DELETE...)
+        - Se crea una data class ("@Serializable") que sirve para procesar la información recibida por la api.
+        - (No es necesario que la clase asigne a un atributo cada uno de los elementos que recibe de la api pero en caso de no hacerlo; será necesario establecer el "IgnoreUnknownKeys" en true cuando se cree el builder")
+
+    - NetworkModule:
+        - Se crea un Módulo de Hilt para proveer la instancia de "Retrofit" (crear el builder) y de "ChuckNorrisService"
+
+    - ChuckNorrisViewModel:
+      - Se crea un ViewModel (@HiltViewModel) para manejar la lógica de solicitud de información a la API.
+      - Se crea una variable pública consejo que es un StateFlow y una variable privada "MutableStateFlow" que le asigna el valor.
+      - Se crea una variable pública imagenUrl que es un StateFlow y una variable privada "MutableStateFlow" que le asigna el valor.
+      - Se crea un método "fetchOtroConsejo" que solicita información a la API y modifica el valor de las variables privadas asignando el consejo y la imagen.
+
+    - MainActivity:
+      - Se inyecta directamente el "ChuckNorrisViewModel" al composable "PantallaChuckNorris". 
+      - Se guardan el consejo y la imagen con "collectAsState()" (Observable).
+      - Al pulsar el botón se ejecuta el método del viewModel "fetchOtroConsejo" para conseguir otro chiste de la API y actualiazr la imagen.
+      - Para que la imagen se actualice dinámicamente se utiliza "AsyncImage" (implementation("io.coil-kt:coil-compose:2.2.2"))
+
+2. Room + Hilt + ViewModel:
+
+    - DatabaseModule:
+        - Se crea un módulo (@Module) de Hilt para proveer (@Provides) la instancia de la clase AppDatabase y los DAO que se van a inyectar. Es en este módulo en el que se construye la base de datos (.build()).
+
+    - TournamentDao:
+        - Se modifica el método que devuelve los torneos y las categorías para en lugar de devolver una lista estática, devolver un Flow.
+
+    - TorneoRepository:
+        - Funciona como una capa más de abstracción de la base de datos a la hora de manejarla desde el ViewModel.
+        - Se crea una función suspendidda para insertar datos iniciales si la base de datos está vacía.
+
+    - TorneoViewModel:
+        - Se crea un ViewModel (@HiltViewModel) para manejar la lógica de solicitud de información a la base de datos
+        - Se inyecta directamente el "TorneoRepository" (@Inject).
+        - Se convierte el Flow que devuelve la función creada en el repository en un StateFlow para poder usar "collectAsState" en el composable y se lanza la función para insertar datos si son necesarios al iniciar el ViewModel.
+        - "stateIn" ya maneja la consulta en segundo plano sin necesidad de incluir "Dispatchers.IO".
+
+    - MainActivity:
+        - Se inyecta directamente el "TorneoViewModel" al composable "PantallaTorneo" y se guarda la lista de torneos con "collectAsState()" (Observable).
+        - Ya se puede acceder de forma normal a la lista de torneos y en caso de que haya algún cambio en la base de datos se reflejará en tiempo real.
+
+Anotaciones: 
+- Es necesario poner "@HiltAndroidApp" en la clase application ("WrestlingApplication").
+- Es necesario poner "@AndroidEntryPoint" en el MainActivity
+
+
 ## Próximos pasos 📋
 
 (Pendiente de comprender el funcionamiento y practicar con el ViweModel)
