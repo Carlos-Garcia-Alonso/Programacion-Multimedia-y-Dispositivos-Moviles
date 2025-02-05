@@ -5,8 +5,10 @@ import com.carlosgarciaalonso.wrestlingapp.domain.ChuckNorrisJoke
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
-public class ChuckRepository @Inject constructor(private val api : ChuckNorrisService) {
+@Singleton
+class ChuckRepository @Inject constructor(private val api : ChuckNorrisService) {
 
     suspend fun getJoke() : ChuckNorrisJoke {
         return withContext(Dispatchers.IO) {

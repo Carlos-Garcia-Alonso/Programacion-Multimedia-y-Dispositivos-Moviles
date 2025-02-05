@@ -34,7 +34,7 @@ class ChuckNorrisViewModel @Inject constructor(
 
 
     //Solicitar un chiste a la API:
-    fun fetchOtroConsejo() {
+    private fun fetchOtroConsejo() {
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ChuckNorrisState.Loading
             try {

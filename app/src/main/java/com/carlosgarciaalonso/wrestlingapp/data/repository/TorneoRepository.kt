@@ -2,7 +2,7 @@ package com.carlosgarciaalonso.wrestlingapp.data.repository
 
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.AppDatabase
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.RoomCallback
-import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
+import com.carlosgarciaalonso.wrestlingapp.domain.TournamentWithCategories
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject

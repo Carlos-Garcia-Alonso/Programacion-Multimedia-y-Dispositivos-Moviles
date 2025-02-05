@@ -13,7 +13,7 @@ Adicionalmente podrá contar con un apartado para el seguimiento de torneos o la
 
 ⚠️ Estado del Proyecto: En Desarrollo ⚠️
 
-Este proyecto se encuentra en una fase inicial, aún queda un largo camino por delante. En este momento solo cuenta con una pantalla principal donde se disponen fotos y descripciones de algunas de las principales secciones y un título. Existe una pequeña navegación básica: las imágenes son elementos clickables que redirigen a otra pantalla aún en construcción.
+Este proyecto se encuentra en una fase inicial, aún queda un largo camino por delante. En este momento solo cuenta con una pantalla principal donde se disponen fotos y descripciones de algunas de las principales secciones y un título. Existe una pequeña navegación básica: las imágenes son elementos clickables que redirigen a otras pantallas: técnicas, torneos y "consejos"; aunque el diseño de estas pantallas es aún muy básico.
 
 
 ## Objetivos
@@ -140,14 +140,31 @@ En esta versión se mueve la lógica de la base de datos de Room para trabajar c
 
     - ChuckNorrisViewModel:
       - Se crea un ViewModel (@HiltViewModel) para manejar la lógica de solicitud de información a la API.
-      - Se crea una variable pública consejo que es un StateFlow y una variable privada "MutableStateFlow" que le asigna el valor.
-      - Se crea una variable pública imagenUrl que es un StateFlow y una variable privada "MutableStateFlow" que le asigna el valor.
-      - Se crea un método "fetchOtroConsejo" que solicita información a la API y modifica el valor de las variables privadas asignando el consejo y la imagen.
+      - Se inyecta la clase "GetChuckNorrisUseCase" que tiene a su vez inyectada la clase "ChuckRepository"
+      - Se crea una variable "state" "MutableStateFlow" para manejar el estado de la solicitud a internet.
+      - Se crea la interfaz "ChuckNorrisState" para trabajar con los estados
+      - Se crea un método "fetchOtroConsejo" que solicita información a la API y modifica el valor de las variables privadas asignando el estado.
+      - Mientras se producte la solicitud el estado es "Loading", en el momento de conseguir el chiste se cambia a "Success" y en caso de fracasar es "Error".
+
+    - GetChuckNorrisUseCase:
+      - Se crea una clase "GetChuckNorrisUseCase" que inyecta la clase "ChuckRepository"
+      - Se crea una función que llama a la función "getJoke()" del repositorio a en segundo plano "withContext(Dispatchers.IO)".
+      
+    - ChuckRepository:
+        - Se crea una clase "ChuckRepository" que inyecta la interfaz "ChuckNorrisService"
+        - Se crea una función que llama a la función "getRandomJoke()" de la clase "service" en segundo plano "withContext(Dispatchers.IO)" y transforma la información en un objeto de tipo "ChuckNorrisJoke".
+      
+    - ChuckNorrisJoke:
+      - Clase que declara el tipo de objeto que se va a obtener con las solicitudes a la web.
 
     - MainActivity:
       - Se inyecta directamente el "ChuckNorrisViewModel" al composable "PantallaChuckNorris". 
-      - Se guardan el consejo y la imagen con "collectAsState()" (Observable).
-      - Al pulsar el botón se ejecuta el método del viewModel "fetchOtroConsejo" para conseguir otro chiste de la API y actualiazr la imagen.
+      - Se guardan el estado con "collectAsState()" (Observable).
+      - Se utiliza "when(state)" para manejar los diferentes comportamientos en función de la solicitud que se haga a la api:
+        - Loading: Muestra un elemento de progreso circular.
+        - Success: Muestra la imagen y el texto recogidos de la api.
+        - Error: Muestra un mensaje de que no hay internet (Queda pendiente crear una base de datos que incorpore las bronmas para que en caso de error se pueda acceder a las bromas almacenadas en local).
+      - Al pulsar el botón se ejecuta el método del viewModel "onJokeClicked" que tiene asignado el mismo método que el "init" ("fetchOtroConsejo()") para conseguir otro chiste de la API y actualiazr la imagen.
       - Para que la imagen se actualice dinámicamente se utiliza "AsyncImage" (implementation("io.coil-kt:coil-compose:2.2.2"))
 
 2. Room + Hilt + ViewModel:
@@ -160,17 +177,26 @@ En esta versión se mueve la lógica de la base de datos de Room para trabajar c
 
     - TorneoRepository:
         - Funciona como una capa más de abstracción de la base de datos a la hora de manejarla desde el ViewModel.
+        - Se inyecta la base de datos "AppDatabase".
         - Se crea una función suspendidda para insertar datos iniciales si la base de datos está vacía.
+        - Se crea una función que llama a la función definida en el Dao para obtener un flow con la lista de los torneos.
+      
+   - GetTournamentUseCase:
+       - Se crea una clase UseCase a la que se inyecta (@Inject) el repositorio.
+       - Se crean nuevas funciones para acceder a las funciones del repositorio; en el caso del insert, es necesario especificar que se haga en segundo plano con "withContext(Dispatchers.IO)".
 
     - TorneoViewModel:
         - Se crea un ViewModel (@HiltViewModel) para manejar la lógica de solicitud de información a la base de datos
-        - Se inyecta directamente el "TorneoRepository" (@Inject).
-        - Se convierte el Flow que devuelve la función creada en el repository en un StateFlow para poder usar "collectAsState" en el composable y se lanza la función para insertar datos si son necesarios al iniciar el ViewModel.
-        - "stateIn" ya maneja la consulta en segundo plano sin necesidad de incluir "Dispatchers.IO".
+        - Se inyecta directamente el "GetTournamentUseCase" (@Inject).
+        - Se manejan los estados del mismo modo que se hizo en el ViewModel de ChuckNorris.
+        - Se consiguen los datos de los torneos a través de un ".collect" de la función que devuelve el Flow para observar los cambios en la base de datos en tiempo real.
 
     - MainActivity:
-        - Se inyecta directamente el "TorneoViewModel" al composable "PantallaTorneo" y se guarda la lista de torneos con "collectAsState()" (Observable).
-        - Ya se puede acceder de forma normal a la lista de torneos y en caso de que haya algún cambio en la base de datos se reflejará en tiempo real.
+        - Se inyecta directamente el "TorneoViewModel" al composable "PantallaTorneo" y se guarda el estado con "collectAsState()" (Observable).
+        - Se utiliza "when(state)" del mismo modo que en el composable de ChuckNorris para manejar las diferentes posibilidades en función del estado en el que se encuentre el acceso a la base de datos:
+          - Loading: Muestra un elemento de progreso circular.
+          - Success: Muestra el torneo recogido de la base de datos.
+          - Error: Muestra un mensaje de que no hay torneos disponibles.
 
 Anotaciones: 
 - Es necesario poner "@HiltAndroidApp" en la clase application ("WrestlingApplication").
@@ -178,8 +204,6 @@ Anotaciones:
 
 
 ## Próximos pasos 📋
-
-(Pendiente de comprender el funcionamiento y practicar con el ViweModel)
 
 - Definir e introducir todos los apartados principales de la aplicación.
 - Diseñar las pantallas de cada una de estas secciones.

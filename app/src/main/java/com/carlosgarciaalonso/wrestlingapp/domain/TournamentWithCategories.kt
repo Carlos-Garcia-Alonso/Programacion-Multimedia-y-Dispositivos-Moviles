@@ -1,4 +1,4 @@
-package com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados
+package com.carlosgarciaalonso.wrestlingapp.domain
 
 // Clase para almacenar la información de los torneos con la información de las categorías que
 // participan en ellos

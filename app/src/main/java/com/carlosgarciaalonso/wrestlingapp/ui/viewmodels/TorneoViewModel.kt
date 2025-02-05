@@ -3,14 +3,12 @@ package com.carlosgarciaalonso.wrestlingapp.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carlosgarciaalonso.wrestlingapp.data.repository.TorneoRepository
-import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
+import com.carlosgarciaalonso.wrestlingapp.domain.GetTournamentUseCase
+import com.carlosgarciaalonso.wrestlingapp.domain.TournamentWithCategories
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,7 +16,7 @@ import javax.inject.Inject
 // los refleja como StateFlow para la UI.
 @HiltViewModel
 class TorneoViewModel @Inject constructor(
-    private val repository: TorneoRepository
+    private val getTournament: GetTournamentUseCase
 ) : ViewModel() {
 
     // MutableStateFlow privado para manejar los estados
@@ -26,14 +24,14 @@ class TorneoViewModel @Inject constructor(
     val state: StateFlow<TournamentsState> = _state // Exposición pública
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _state.value = TournamentsState.Loading // Emitimos estado de carga
             try {
                 // Insertamos datos iniciales si es necesario
-                repository.insertInitialDataIfNeeded()
+                getTournament.insertInitialDataIfNeeded()
 
                 // Comenzamos a recolectar los datos en tiempo real
-                repository.getAllTournamentsWithCategoriesFlow().collect { tournaments ->
+                getTournament.getTournamentFlow().collect { tournaments ->
                     // Emitimos el estado de éxito con los datos obtenidos
                     _state.value = TournamentsState.Success(tournaments)
                 }

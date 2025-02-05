@@ -1,6 +1,5 @@
 package com.carlosgarciaalonso.wrestlingapp.ui
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.res.Configuration
 import android.os.Bundle
@@ -38,27 +37,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -73,31 +63,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.carlosgarciaalonso.wrestlingapp.R
-import com.carlosgarciaalonso.wrestlingapp.WrestlingApplication
-import com.carlosgarciaalonso.wrestlingapp.data.network.ChuckNorrisService
-import com.carlosgarciaalonso.wrestlingapp.data.network.RandomJokeReponse
-import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.AppDatabase
-import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.RoomCallback
-import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
-import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.Tournament
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.repositories.ExerciseRepository
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.ChuckNorrisState
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.ChuckNorrisViewModel
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TorneoViewModel
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TournamentsState
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
-import retrofit2.Retrofit
-import okhttp3.MediaType.Companion.toMediaType
 
 // Clase para los grupos de imagenes y técnicas
 // La diferencia entre una clase normal y una "data class" es que la "data class" no necesita declarar

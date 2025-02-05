@@ -1,7 +1,7 @@
 package com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.dao
 
 import androidx.room.*
-import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
+import com.carlosgarciaalonso.wrestlingapp.domain.TournamentWithCategories
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.Tournament
 import kotlinx.coroutines.flow.Flow
 
