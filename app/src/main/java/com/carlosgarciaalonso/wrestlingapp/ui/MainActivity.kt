@@ -81,6 +81,7 @@ import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.RoomCallback
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.combinados.TournamentWithCategories
 import com.carlosgarciaalonso.wrestlingapp.data.roomdatabase.entity.Tournament
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.repositories.ExerciseRepository
+import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.ChuckNorrisState
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.ChuckNorrisViewModel
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TorneoViewModel
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TournamentsState
@@ -593,9 +594,8 @@ fun PantallaChuckNorris(
 ) {
 
     // Observamos el StateFlow con collectAsState()
-    val consejo by viewModel.consejo.collectAsState()
+    val state by viewModel.state.collectAsState()
 
-    val imagenUrl by viewModel.imagenUrl.collectAsState() // Observar la imagen
 
     Scaffold (
         modifier = Modifier.fillMaxSize(),
@@ -621,29 +621,51 @@ fun PantallaChuckNorris(
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                                        .padding(15.dp),
-                    text = consejo,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                // Mostrar la imagen de Chuck Norris usando AsyncImage (Coil)
-                AsyncImage(
-                    model = imagenUrl,  // Cargar la URL de la imagen
-                    contentDescription = "Imagen de Chuck Norris",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp) // Tamaño de la imagen
-                )
+
+                when (state){
+                    is ChuckNorrisState.Loading -> {
+                        // Mostrar un indicador de carga
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    }
+                    is ChuckNorrisState.Success -> {
+                        val broma = (state as ChuckNorrisState.Success).joke
+                        Text(
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                                .padding(15.dp),
+                            text = broma.broma,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        // Mostrar la imagen de Chuck Norris usando AsyncImage (Coil)
+                        AsyncImage(
+                            model = broma.imagen,  // Cargar la URL de la imagen
+                            contentDescription = "Imagen de Chuck Norris",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp) // Tamaño de la imagen
+                        )
+                    }
+                    is ChuckNorrisState.Error -> {
+                        val error = (state as ChuckNorrisState.Error).error
+                        Text(
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                                .padding(15.dp),
+                            text = error,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     onClick = {
                         // Llamamos de nuevo al ViewModel para obtener otro chiste
-                        viewModel.fetchOtroConsejo()
+                        viewModel.onJokeClicked()
                     }
                 ) {
                     Text(text = "Otro consejo")

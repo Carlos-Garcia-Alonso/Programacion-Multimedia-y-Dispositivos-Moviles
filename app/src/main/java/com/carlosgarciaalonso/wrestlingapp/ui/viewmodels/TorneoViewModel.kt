@@ -46,7 +46,7 @@ class TorneoViewModel @Inject constructor(
 }
 
 sealed interface TournamentsState {
-    object Loading : TournamentsState
+    data object Loading : TournamentsState
     data class Success(val data: List<TournamentWithCategories>) : TournamentsState
     data class Error(val message: String) : TournamentsState
 }
