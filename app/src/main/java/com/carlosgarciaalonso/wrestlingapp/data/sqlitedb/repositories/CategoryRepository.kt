@@ -8,7 +8,8 @@ import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteContract
 import com.carlosgarciaalonso.wrestlingapp.data.sqlitedb.WrestlingSqliteHelper
 
 // Clase repositorio con las funciones necesarias para realizar el CRUD de la tabla de categorías
-class CategoryRepository(context: Context) {
+class
+CategoryRepository(context: Context) {
 
     //Se referencia la instancia de la base de datos creada en "WrestlingApplication"
     private val dbHelper = (context.applicationContext as WrestlingApplication).dbHelper

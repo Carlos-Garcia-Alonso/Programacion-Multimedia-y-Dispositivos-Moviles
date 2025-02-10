@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carlosgarciaalonso.wrestlingapp.data.repository.TorneoRepository
 import com.carlosgarciaalonso.wrestlingapp.domain.GetTournamentUseCase
+import com.carlosgarciaalonso.wrestlingapp.domain.InsertTournamentUseCase
 import com.carlosgarciaalonso.wrestlingapp.domain.TournamentWithCategories
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +17,8 @@ import javax.inject.Inject
 // los refleja como StateFlow para la UI.
 @HiltViewModel
 class TorneoViewModel @Inject constructor(
-    private val getTournament: GetTournamentUseCase
+    private val getTournament: GetTournamentUseCase,
+    private val insertTournament: InsertTournamentUseCase
 ) : ViewModel() {
 
     // MutableStateFlow privado para manejar los estados
@@ -28,10 +30,10 @@ class TorneoViewModel @Inject constructor(
             _state.value = TournamentsState.Loading // Emitimos estado de carga
             try {
                 // Insertamos datos iniciales si es necesario
-                getTournament.insertInitialDataIfNeeded()
+                insertTournament()
 
                 // Comenzamos a recolectar los datos en tiempo real
-                getTournament.getTournamentFlow().collect { tournaments ->
+                getTournament().collect { tournaments ->
                     // Emitimos el estado de éxito con los datos obtenidos
                     _state.value = TournamentsState.Success(tournaments)
                 }

@@ -8,15 +8,9 @@ import javax.inject.Inject
 
 class GetTournamentUseCase @Inject constructor(private val repositorio : TorneoRepository) {
 
-    fun getTournamentFlow() : Flow<List<TournamentWithCategories>> {
+    operator fun invoke() : Flow<List<TournamentWithCategories>> {
        //No es necesario un context cuando se devuelve un flow porque ya maneja él la asincronía
        return repositorio.getAllTournamentsWithCategoriesFlow()
 
-    }
-
-    suspend fun insertInitialDataIfNeeded() {
-        withContext(Dispatchers.IO){
-            repositorio.insertInitialDataIfNeeded()
-        }
     }
 }

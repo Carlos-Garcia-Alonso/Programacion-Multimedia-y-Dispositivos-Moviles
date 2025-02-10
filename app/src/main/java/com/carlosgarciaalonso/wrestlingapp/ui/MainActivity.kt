@@ -41,6 +41,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.LaunchedEffect
@@ -49,14 +50,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -68,8 +72,11 @@ import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.ChuckNorrisState
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.ChuckNorrisViewModel
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TorneoViewModel
 import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.TournamentsState
+import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.UsuarioState
+import com.carlosgarciaalonso.wrestlingapp.ui.viewmodels.UsuarioViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 
 // Clase para los grupos de imagenes y técnicas
@@ -338,13 +345,16 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
                 // el modificador "Arragement.Top" indica que cuando el contenedor sea más grande que
                 // lo que ocupan sus contenidos, estos se situarán en la parte de arriba y el espacio
                 // restante abajo.
-                verticalArrangement = Arrangement.Top
+                verticalArrangement = Arrangement.Top,
+
             ) { // Contenido de la columna:
-                AddText(    // Utilizo una función propia para añadir un texto
-                    texto = "Estas imágenes funcionarán a modo de botón para navegar por la aplicación",
+                AddText(
                     // Añado paddings personalizados:
                     modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 32.dp)
                 )
+                Spacer(modifier = Modifier.height(8.dp))   // Separación con las imágenes
+
+                OtroUsuario()
 
                 Spacer(modifier = Modifier.height(16.dp))   // Separación con las imágenes
 
@@ -652,18 +662,84 @@ fun PantallaChuckNorris(
 
 @Composable // Utilizamos Composable para decir que estamos definiendo una UI
 // Funcion para añadir texto con unas propiedades concretas
-fun AddText(texto: String, modifier: Modifier = Modifier) {
-    Text(
-        text = texto,   //El string que se pasa como argumento es el texto
-        modifier = modifier
-            .fillMaxWidth(), //Ocupa el espacio disponible
-        // Con "MaterialTheme.typography.bodyMedium" ya se está añadiendo al texto un estilo
-        // predefinido por Material Design. Con ".copy" lo que se hace es coger ese estilo
-        // predefinido y modificar solo una de las propiedades
-        style = MaterialTheme.typography.bodyMedium.copy(
-            textAlign = TextAlign.Justify   //Texto justificado
+fun AddText(modifier: Modifier = Modifier, viewModel : UsuarioViewModel = hiltViewModel())  {
+    val state by viewModel.state.collectAsState()
+
+    when(state) {
+        is UsuarioState.Loading -> {
+
+            Text(
+                text = "Bienvenido",
+                modifier = modifier
+                    .fillMaxWidth(), //Ocupa el espacio disponible
+                // Con "MaterialTheme.typography.bodyMedium" ya se está añadiendo al texto un estilo
+                // predefinido por Material Design. Con ".copy" lo que se hace es coger ese estilo
+                // predefinido y modificar solo una de las propiedades
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    textAlign = TextAlign.Justify   //Texto justificado
+                )
+            )
+
+        }
+        is UsuarioState.Error -> {
+
+            Text(
+                text = "Bienvenido\n${(state as UsuarioState.Error).error}",
+                modifier = modifier
+                    .fillMaxWidth(),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    textAlign = TextAlign.Justify
+                )
+            )
+
+        }
+        is UsuarioState.Success -> {
+            Text(
+                text = "Bienvenido ${(state as UsuarioState.Success).usuario}",
+                modifier = modifier
+                    .fillMaxWidth(),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    textAlign = TextAlign.Justify
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun OtroUsuario (viewModel : UsuarioViewModel = hiltViewModel()){
+    var nombre by rememberSaveable { mutableStateOf("") }
+    Column(modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally){
+
+        TextField(modifier = Modifier.fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp),
+            maxLines = 1,
+            value = nombre,
+            label = {
+                Text(
+                    text = "Escribe aquí tu nombre si deseas cambiarlo"
+                )
+            },
+            onValueChange = {
+                    nuevo ->
+                nombre = nuevo
+
+            }
         )
-    )
+        Spacer(modifier = Modifier.padding(8.dp))
+        Button(
+                onClick = {
+                    viewModel.onChange(nombre)
+                    nombre = ""
+                }
+        ) {
+            Text(color = Color.White, text = "Guardar nombre")
+        }
+
+    }
+
 }
 
 @Composable //Utilizamos Composable para decir que estamos definiendo una UI
