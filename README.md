@@ -203,6 +203,16 @@ Anotaciones:
 - Es necesario poner "@AndroidEntryPoint" en el MainActivity
 
 
+## Cambios v5.0
+
+En esta versión se mueve la lógica de la base de datos de Room para trabajar con Hilt y ViewModel. Además se incorpora el acceso a internet con Retrofit:
+
+1. Acceso a internet:
+
+    - ChuckNorrisService:
+        - El primer paso es crear una interfaz en la que se definen los métodos necesarios para acceder a la información de la api con "@GET" (En caso de necesitarlos también habria que definir aquí los @POST, @DELETE...)
+
+
 ## Próximos pasos 📋
 
 - Definir e introducir todos los apartados principales de la aplicación.

@@ -45,7 +45,7 @@ class UsuarioViewModel @Inject constructor(
 
                 _state.value = UsuarioState.Success(getUsuario())
 
-            } catch (e:Error){
+            } catch (e:Exception){
                 _state.value = UsuarioState.Error("Error al acceder al usuario: $e")
             }
 

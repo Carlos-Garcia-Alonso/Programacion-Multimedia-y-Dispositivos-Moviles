@@ -352,9 +352,6 @@ fun MainScreen(tecnicas: List<Tecnica>, onclick: (String) -> Unit) {
                     // Añado paddings personalizados:
                     modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 32.dp)
                 )
-                Spacer(modifier = Modifier.height(8.dp))   // Separación con las imágenes
-
-                OtroUsuario()
 
                 Spacer(modifier = Modifier.height(16.dp))   // Separación con las imágenes
 
@@ -605,13 +602,13 @@ fun PantallaChuckNorris(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                when (state){
+                when (val current = state){
                     is ChuckNorrisState.Loading -> {
                         // Mostrar un indicador de carga
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                     }
                     is ChuckNorrisState.Success -> {
-                        val broma = (state as ChuckNorrisState.Success).joke
+                        val broma = current.joke
                         Text(
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                                 .padding(15.dp),
@@ -631,7 +628,7 @@ fun PantallaChuckNorris(
                         )
                     }
                     is ChuckNorrisState.Error -> {
-                        val error = (state as ChuckNorrisState.Error).error
+                        val error = current.error
                         Text(
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                                 .padding(15.dp),
@@ -664,57 +661,54 @@ fun PantallaChuckNorris(
 // Funcion para añadir texto con unas propiedades concretas
 fun AddText(modifier: Modifier = Modifier, viewModel : UsuarioViewModel = hiltViewModel())  {
     val state by viewModel.state.collectAsState()
-
-    when(state) {
-        is UsuarioState.Loading -> {
-
-            Text(
-                text = "Bienvenido",
-                modifier = modifier
-                    .fillMaxWidth(), //Ocupa el espacio disponible
-                // Con "MaterialTheme.typography.bodyMedium" ya se está añadiendo al texto un estilo
-                // predefinido por Material Design. Con ".copy" lo que se hace es coger ese estilo
-                // predefinido y modificar solo una de las propiedades
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    textAlign = TextAlign.Justify   //Texto justificado
-                )
-            )
-
-        }
-        is UsuarioState.Error -> {
-
-            Text(
-                text = "Bienvenido\n${(state as UsuarioState.Error).error}",
-                modifier = modifier
-                    .fillMaxWidth(),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    textAlign = TextAlign.Justify
-                )
-            )
-
-        }
-        is UsuarioState.Success -> {
-            Text(
-                text = "Bienvenido ${(state as UsuarioState.Success).usuario}",
-                modifier = modifier
-                    .fillMaxWidth(),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    textAlign = TextAlign.Justify
-                )
-            )
-        }
-    }
-}
-
-@Composable
-fun OtroUsuario (viewModel : UsuarioViewModel = hiltViewModel()){
     var nombre by rememberSaveable { mutableStateOf("") }
     Column(modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally){
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally){
+        when(state) {
+            is UsuarioState.Loading -> {
+
+                Text(
+                    text = "Bienvenido",
+                    modifier = modifier
+                        .fillMaxWidth(), //Ocupa el espacio disponible
+                    // Con "MaterialTheme.typography.bodyMedium" ya se está añadiendo al texto un estilo
+                    // predefinido por Material Design. Con ".copy" lo que se hace es coger ese estilo
+                    // predefinido y modificar solo una de las propiedades
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        textAlign = TextAlign.Justify   //Texto justificado
+                    )
+                )
+
+            }
+            is UsuarioState.Error -> {
+
+                Text(
+                    text = "Bienvenido\n${(state as UsuarioState.Error).error}",
+                    modifier = modifier
+                        .fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        textAlign = TextAlign.Justify
+                    )
+                )
+
+            }
+            is UsuarioState.Success -> {
+                Text(
+                    text = "Bienvenido ${(state as UsuarioState.Success).usuario}",
+                    modifier = modifier
+                        .fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        textAlign = TextAlign.Justify
+                    )
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         TextField(modifier = Modifier.fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp),
+            .padding(start = 16.dp, end = 16.dp),
             maxLines = 1,
             value = nombre,
             label = {
@@ -728,20 +722,17 @@ fun OtroUsuario (viewModel : UsuarioViewModel = hiltViewModel()){
 
             }
         )
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Button(
-                onClick = {
-                    viewModel.onChange(nombre)
-                    nombre = ""
-                }
+            onClick = {
+                viewModel.onChange(nombre)
+                nombre = ""
+            }
         ) {
             Text(color = Color.White, text = "Guardar nombre")
         }
-
     }
 }
-
-
 
 @Composable //Utilizamos Composable para decir que estamos definiendo una UI
 //Esta es la función que genera los contenedores de imagen + texto
