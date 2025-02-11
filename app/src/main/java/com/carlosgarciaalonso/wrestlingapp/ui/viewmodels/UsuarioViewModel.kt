@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -19,7 +20,7 @@ class UsuarioViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<UsuarioState>(UsuarioState.Loading)
-    val state = _state
+    val state : StateFlow<UsuarioState> = _state
 
     init {
         _state.value = UsuarioState.Loading

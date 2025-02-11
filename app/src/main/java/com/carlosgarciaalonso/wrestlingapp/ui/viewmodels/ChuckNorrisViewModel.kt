@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.lang.Thread.State
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,7 +20,7 @@ class ChuckNorrisViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ChuckNorrisState>(ChuckNorrisState.Loading)
-    val state = _state
+    val state : StateFlow<ChuckNorrisState> = _state
 
     init {
         // Llamada inicial al servicio para obtener un chiste

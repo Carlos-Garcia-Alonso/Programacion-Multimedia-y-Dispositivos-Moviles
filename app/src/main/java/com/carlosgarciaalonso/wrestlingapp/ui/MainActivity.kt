@@ -739,8 +739,9 @@ fun OtroUsuario (viewModel : UsuarioViewModel = hiltViewModel()){
         }
 
     }
-
 }
+
+
 
 @Composable //Utilizamos Composable para decir que estamos definiendo una UI
 //Esta es la función que genera los contenedores de imagen + texto
