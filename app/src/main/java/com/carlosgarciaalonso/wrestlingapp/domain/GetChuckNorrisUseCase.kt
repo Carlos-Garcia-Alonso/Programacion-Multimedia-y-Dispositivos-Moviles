@@ -12,7 +12,5 @@ class GetChuckNorrisUseCase @Inject constructor(private val repository: ChuckRep
         return withContext(Dispatchers.IO) {
             repository.getJoke()
         }
-
     }
-
 }
