@@ -205,15 +205,15 @@ Anotaciones:
 
 ## Cambios v5.0
 
-En esta versión se termina de pulir la arquitectura de la aplicación aunque gran parte del trabajo se adelantó en la versión anterior. Además se añade el uso de "Sharedpreferences":
+En esta versión se termina de pulir la arquitectura de la aplicación (aunque gran parte del trabajo se adelantó en la versión anterior). Además se añade el uso de "Sharedpreferences" para guardar y acceder a un usuario:
 
 1. Implementación SharedPreferences:
 
    - UsuarioModule:
-     - Se crea el SharedPreference en un módulo (getSharedPreferences) y se utiliza @Provides para poder acceder a él desde el repositorio.
+     - Se crea el SharedPreference en un módulo (utilizando getSharedPreferences) y se utiliza @Provides para poder acceder a él desde el repositorio.
      
    - UsuarioRepository:
-       - En el repositorio se inyectan los SharedPreferences y se crean las funciones necesarias para insertar y acceder a los datos; en este caso el usuario.
+       - En el repositorio se inyectan (@Inject) los SharedPreferences y se crean las funciones necesarias para insertar y acceder a los datos (en este caso el usuario).
      
    - GetUsuarioUseCase:
        - Se inyecta el repositorio y se llama al método que devuelve el usaurio.
@@ -222,20 +222,20 @@ En esta versión se termina de pulir la arquitectura de la aplicación aunque gr
        - Se inyecta el repositorio y se llama al método que se utiliza para insertar un usuario.
      
    - UsuarioViewModel:
-       - Al iniciar el viewModel se accede al usuario guardado en los SharedPreferences.
        - Se inyectan los dos UseCase.
-       - Se crea una función para insertar el usuario que se va a llamar desde el composable cuando se pulse el botón para guardar un nuevo usaurio.
+       - Al iniciar el viewModel se accede al usuario guardado en los SharedPreferences.
+       - Se crea una función para insertar el usuario (onChange) que se va a llamar desde el composable cuando se pulse el botón para guardar un nuevo usaurio.
 
    - MainActivity:
-       - Creé un composable con un texto, un textField y un botón para darle la bienvenida al usuario. 
-       - Se recibe el estado del viewModel con "by viewModel.state.collectAsState"
+       - Creé un composable con un texto para darle la bienvenida al usuario, un textField y un botón para poder introducir otro nombre en los SharedPreferences. 
+       - Se recibe el estado del viewModel con "by viewModel.state.collectAsState" (como en el caso de la base de datos y del acceso a red).
        - Utiliza el estado para mostrar distintos mensajes de bienvenida en función del usuario guardado en los "SharedPreferences".
-       - Cuando se pulsa el botón se llama a la función "onChange" del ViewModel y se actualiza el valor del estado para recibir el nuevo usuario. (Lo hago así porque los Shared Preferences no son observables).
+       - Cuando se pulsa el botón se llama a la función "onChange" del ViewModel y se actualiza el valor del estado para recibir el nuevo usuario. (Nota: esta función del viewModel, además de actualizar el usuario, cambia el valor del estado; esto se hace así los Shared Preferences no son observables, para observar estos cambios en tiempo real sería necesario utilizar un DataStore).
 
 2. Mejoras arquitectura:
 
    - Torneos:
-       - Se divide el UseCase que se hizo en la versión 4.0 en 2 para dividir funcionalidades; uno de ellos para el insert y otro para recoger los datos.
+       - Se divide el UseCase que se hizo en la versión 4.0 en 2 para dividir funcionalidades; uno de ellos para el insert (datos iniciales si la base de datos está vacía) y otro para recoger los datos.
      
    - ChuckNorris:
        - El repositorio, UseCase y ViewModel ya estaban correctamente implementados en la anterior versión.   

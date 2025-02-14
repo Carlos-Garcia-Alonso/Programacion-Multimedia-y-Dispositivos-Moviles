@@ -8,8 +8,8 @@ import javax.inject.Singleton
 @Singleton
 class UsuarioRepository @Inject constructor(private val preferences: SharedPreferences) {
 
-    suspend fun getUsuario() : String? {
-        return preferences.getString("usuario", "[usuario desconocido]")
+    suspend fun getUsuario() : String {
+        return preferences.getString("usuario", "[usuario desconocido]") ?: "[usuario desconocido]"
     }
 
     suspend fun insertUsuario(usuario : String) {

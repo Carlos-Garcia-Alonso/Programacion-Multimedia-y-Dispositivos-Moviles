@@ -6,7 +6,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class GetUsuarioUseCase @Inject constructor(private val repositorio : UsuarioRepository) {
-    suspend operator fun invoke() : String? {
+    suspend operator fun invoke() : String {
         return withContext(Dispatchers.IO) {
             repositorio.getUsuario()
         }
